@@ -1,4 +1,5 @@
-// Import polyfill first to ensure global Buffer is available
+// Import polyfills first to ensure global objects and Buffer are available
+import "./lib/globalPolyfill";
 import "./lib/bufferPolyfill";
 
 import { createRoot } from "react-dom/client";

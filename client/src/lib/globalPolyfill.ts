@@ -3,6 +3,9 @@
  * that StegCloak depends on.
  */
 
+// Import Buffer from the 'buffer' package that's already installed
+import { Buffer } from 'buffer';
+
 // StegCloak expects a global object, which exists in Node.js but not in browsers
 if (typeof window !== 'undefined' && typeof (window as any).global === 'undefined') {
   (window as any).global = window;
@@ -12,7 +15,7 @@ if (typeof window !== 'undefined' && typeof (window as any).global === 'undefine
 if (typeof window !== 'undefined') {
   (window as any).process = (window as any).process || {};
   (window as any).process.env = (window as any).process.env || {};
-  (window as any).Buffer = (window as any).Buffer || require('buffer').Buffer;
+  (window as any).Buffer = Buffer;
 }
 
 export {};
