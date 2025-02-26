@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { runTests } from './test-stegcloak';
+import React, { useState } from 'react';
 import { runUnitTests } from './unit-tests';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function TestRunner() {
+export default function TestPage() {
   const [results, setResults] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [isDone, setIsDone] = useState(false);
-  const [testType, setTestType] = useState<'original' | 'unit'>('unit');
   
   const logRef = React.useRef<HTMLDivElement>(null);
 
   // Intercept console.log and console.error to capture test output
-  useEffect(() => {
-    if (!isRunning) return;
+  const handleRunTests = async () => {
+    setResults([]);
+    setIsDone(false);
+    setIsRunning(true);
     
     const originalLog = console.log;
     const originalError = console.error;
@@ -32,58 +31,34 @@ export default function TestRunner() {
       setResults(prev => [...prev, `ERROR: ${args.join(' ')}`]);
     };
     
-    // Execute tests based on the selected type
-    const testPromise = testType === 'original' 
-      ? runTests()
-      : runUnitTests();
-    
-    testPromise
-      .then((results) => {
-        setIsDone(true);
-        setIsRunning(false);
-        if (results && typeof results === 'object') {
-          const summary = `Tests completed: ${results.passCount} passed, ${results.failCount} failed`;
-          console.log(summary);
-        }
-      })
-      .catch(err => {
-        console.error('Test execution error:', err);
-        setIsDone(true);
-        setIsRunning(false);
-      })
-      .finally(() => {
-        // Restore original console methods
-        console.log = originalLog;
-        console.error = originalError;
-      });
-      
-    return () => {
-      // Cleanup - restore original console methods
+    try {
+      // Execute tests
+      await runUnitTests();
+    } catch (err) {
+      console.error('Test execution error:', err);
+    } finally {
+      // Restore original console methods
       console.log = originalLog;
       console.error = originalError;
-    };
-  }, [isRunning, testType]);
+      setIsDone(true);
+      setIsRunning(false);
+    }
+  };
   
   // Auto-scroll to bottom when new logs appear
-  useEffect(() => {
+  React.useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
   }, [results]);
   
-  const handleRunTests = () => {
-    setResults([]);
-    setIsDone(false);
-    setIsRunning(true);
-  };
-  
   return (
     <div className="container mx-auto py-8">
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>Steganography Test Suite</CardTitle>
+          <CardTitle>Steganography Unit Tests</CardTitle>
           <CardDescription>
-            Tests for browserStegCloak, codeSteg, and combined functionality
+            Comprehensive tests for browserStegCloak, codeSteg, and combined functionality
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -92,7 +67,7 @@ export default function TestRunner() {
             disabled={isRunning}
             className="mb-4"
           >
-            {isRunning ? "Running Tests..." : "Run Steganography Tests"}
+            {isRunning ? "Running Tests..." : "Run Unit Tests"}
           </Button>
           
           <div 
@@ -103,13 +78,17 @@ export default function TestRunner() {
               const isPass = line.includes('✅ PASS');
               const isFail = line.includes('❌ FAIL');
               const isHeading = line.includes('-----');
+              const isSuccess = line.includes('- ✓ Success');
+              const isWarning = line.includes('- ⚠️ Warning');
               
               return (
                 <div 
                   key={index} 
                   className={`${isPass ? 'text-green-600 dark:text-green-400' : ''} 
                               ${isFail ? 'text-red-600 dark:text-red-400 font-semibold' : ''} 
-                              ${isHeading ? 'font-bold mt-2' : ''}`}
+                              ${isHeading ? 'font-bold mt-2' : ''}
+                              ${isSuccess ? 'text-green-600 dark:text-green-400' : ''}
+                              ${isWarning ? 'text-amber-600 dark:text-amber-400' : ''}`}
                 >
                   {line}
                 </div>
