@@ -207,12 +207,24 @@ export default function OutputPanel({
                 </div>
               )}
               
-              <CodeEditor
-                value={isEditing ? tempEncodedOutput : encodedOutput || "// Your encoded result will appear here"}
-                onChange={isEditing ? setTempEncodedOutput : () => {}}
-                readOnly={!isEditing}
-                className="bg-[#2D2D2D] text-white p-3 overflow-auto max-h-[400px] font-mono text-sm"
-              />
+              <div>
+                {detectedLanguage && !isEditing && (
+                  <div className="bg-[#1E1E1E] border-b border-[#6E7681] border-opacity-30 py-1 px-3 text-xs flex items-center justify-between">
+                    <span className="text-[#6E7681]">Detected Language: <span className="text-[#2EA44F] font-medium">{detectedLanguage}</span></span>
+                    {mightContainSecret(encodedOutput) && (
+                      <span className="text-amber-400 text-xs ml-2">
+                        • May contain hidden message
+                      </span>
+                    )}
+                  </div>
+                )}
+                <CodeEditor
+                  value={isEditing ? tempEncodedOutput : encodedOutput || "// Your encoded result will appear here"}
+                  onChange={isEditing ? setTempEncodedOutput : () => {}}
+                  readOnly={!isEditing}
+                  className="bg-[#2D2D2D] text-white p-3 overflow-auto max-h-[400px] font-mono text-sm"
+                />
+              </div>
             </div>
             
             <div className="mt-3 text-white text-sm bg-[#F0F3F6] bg-opacity-10 p-3 rounded-md">
@@ -224,6 +236,21 @@ export default function OutputPanel({
           <TabsContent value="reveal">
             <div className="border border-[#6E7681] border-opacity-30 rounded-md p-4">
               <h4 className="text-white text-sm font-medium mb-3">Reveal Secret</h4>
+              
+              {mightContainSecret(encodedOutput) ? (
+                <div className="mb-3 bg-amber-400 bg-opacity-10 border border-amber-400 border-opacity-20 p-2 rounded-md">
+                  <p className="text-amber-400 text-xs flex items-center">
+                    <FaInfoCircle className="mr-2" /> This code appears to contain a hidden secret.
+                  </p>
+                </div>
+              ) : encodedOutput ? (
+                <div className="mb-3 bg-[#6E7681] bg-opacity-10 border border-[#6E7681] border-opacity-20 p-2 rounded-md">
+                  <p className="text-[#6E7681] text-xs flex items-center">
+                    <FaInfoCircle className="mr-2" /> No obvious hidden message detected, but you can still try to reveal a secret.
+                  </p>
+                </div>
+              ) : null}
+              
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="reveal-password" className="block text-white mb-1 text-sm">Password</Label>

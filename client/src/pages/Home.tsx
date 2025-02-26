@@ -72,10 +72,14 @@ export default function Home() {
   };
   
   const handleReveal = async () => {
+    // Reset any previous reveal state
+    setRevealSuccess(false);
+    setRevealedSecret("");
+    
     if (!encodedOutput) {
       toast({
-        title: "Error",
-        description: "No encoded output to reveal from",
+        title: "Empty Content",
+        description: "Please paste or enter code that contains a hidden message",
         variant: "destructive",
       });
       return;
@@ -83,18 +87,19 @@ export default function Home() {
     
     if (!revealPassword) {
       toast({
-        title: "Error",
-        description: "Password is required to reveal the secret",
+        title: "Password Required",
+        description: "Please enter the password used to hide the secret",
         variant: "destructive",
       });
       return;
     }
     
     try {
-      // First, check if the text might contain a hidden message
-      if (!encodedOutput.trim()) {
-        throw new Error("No code provided to check for hidden messages");
-      }
+      // Show a processing toast
+      toast({
+        title: "Processing",
+        description: "Attempting to reveal secret...",
+      });
       
       // Use the imported revealSecret function
       const revealed = await revealSecret(encodedOutput, revealPassword);
@@ -103,25 +108,27 @@ export default function Home() {
         throw new Error("No hidden message found or password is incorrect");
       }
       
+      // Set revealed secret and success state
       setRevealedSecret(revealed);
       setRevealSuccess(true);
+      
       toast({
-        title: "Success",
+        title: "Success!",
         description: "Secret message revealed successfully",
       });
     } catch (error) {
+      console.error("Reveal error:", error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reveal secret",
+        title: "Could Not Reveal Secret",
+        description: error instanceof Error ? error.message : "Password may be incorrect or there's no hidden message",
         variant: "destructive",
       });
-      setRevealSuccess(false);
-      setRevealedSecret("");
     }
   };
   
   const handleClear = () => {
-    setSourceCode("// Enter your code here");
+    // Reset to starter code instead of just a comment
+    setSourceCode("// Enter your code here\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('Developer'));");
     setSecretMessage("");
     setPassword("");
     setRevealPassword("");
@@ -129,9 +136,11 @@ export default function Home() {
     setEncodeSuccess(false);
     setRevealedSecret("");
     setRevealSuccess(false);
+    
+    // Using a better toast message
     toast({
-      title: "Cleared",
-      description: "All fields have been cleared",
+      title: "Reset Complete",
+      description: "All inputs and outputs have been cleared. You can start fresh.",
     });
   };
   
