@@ -148,8 +148,30 @@ export function hide(
   const messageBinary = textToBinary(message);
   const zeroWidthMessage = binaryToZeroWidth(messageBinary);
   
-  // Insert zero-width characters at the beginning
-  return zeroWidthMessage + cover;
+  // Find a comment line to embed the secret into
+  const lines = cover.split('\n');
+  
+  // Look for a single-line comment to insert the zero-width characters
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const commentIndex = line.indexOf('//');
+    
+    if (commentIndex !== -1) {
+      // Insert the zero-width characters right after the //
+      lines[i] = line.substring(0, commentIndex + 2) + zeroWidthMessage + line.substring(commentIndex + 2);
+      return lines.join('\n');
+    }
+  }
+  
+  // If no comment found, try to find an appropriate place - after the first line
+  if (lines.length > 0) {
+    // Add comment with hidden message to the second line
+    lines.splice(1, 0, '// ' + zeroWidthMessage);
+    return lines.join('\n');
+  }
+  
+  // If all else fails, just append it to the code (not ideal)
+  return cover + '\n// ' + zeroWidthMessage;
 }
 
 /**
