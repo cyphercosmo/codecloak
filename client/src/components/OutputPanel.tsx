@@ -31,6 +31,18 @@ export default function OutputPanel({
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [tempEncodedOutput, setTempEncodedOutput] = useState(encodedOutput);
+  const [activeTab, setActiveTab] = useState<string>("encoded");
+  
+  // Update tempEncodedOutput when encodedOutput changes
+  useEffect(() => {
+    setTempEncodedOutput(encodedOutput);
+  }, [encodedOutput]);
+  
+  // Check if code might contain hidden messages
+  const mightContainSecret = (code: string): boolean => {
+    // Look for zero-width characters that indicate hidden content
+    return code.includes('\u200B') || code.includes('\u200C') || code.includes('\u200D');
+  };
   
   const handleCopy = async () => {
     if (encodedOutput) {
@@ -55,10 +67,20 @@ export default function OutputPanel({
       const text = await navigator.clipboard.readText();
       setTempEncodedOutput(text);
       setEncodedOutput(text);
-      toast({
-        title: "Pasted!",
-        description: "Code pasted from clipboard. You can now reveal any hidden secrets.",
-      });
+      
+      // Check if the pasted text might contain a hidden message
+      if (mightContainSecret(text)) {
+        setActiveTab("reveal");
+        toast({
+          title: "Secret detected!",
+          description: "Hidden message detected in the code. Enter a password to reveal it.",
+        });
+      } else {
+        toast({
+          title: "Pasted!",
+          description: "Code pasted from clipboard. You can now reveal any hidden secrets.",
+        });
+      }
     } catch (err) {
       toast({
         title: "Failed to paste",
@@ -72,10 +94,20 @@ export default function OutputPanel({
     if (isEditing) {
       // Save changes
       setEncodedOutput(tempEncodedOutput);
-      toast({
-        title: "Updated!",
-        description: "Code has been updated",
-      });
+      
+      // Check if the edited text might contain a hidden message
+      if (mightContainSecret(tempEncodedOutput)) {
+        setActiveTab("reveal");
+        toast({
+          title: "Secret detected!",
+          description: "Hidden message may be present in this code. Switch to 'Reveal Secret' tab to decode it.",
+        });
+      } else {
+        toast({
+          title: "Updated!",
+          description: "Code has been updated",
+        });
+      }
     }
     setIsEditing(!isEditing);
   };
@@ -116,7 +148,7 @@ export default function OutputPanel({
       </div>
       
       <div className="p-4 bg-[#2D2D2D]">
-        <Tabs defaultValue="encoded" className="mb-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
           <TabsList className="bg-[#1E1E1E] border border-[#6E7681] border-opacity-30 mb-4">
             <TabsTrigger value="encoded" className="data-[state=active]:bg-[#3B3B3B] text-white data-[state=active]:text-[#2EA44F]">Encoded Code</TabsTrigger>
             <TabsTrigger value="reveal" className="data-[state=active]:bg-[#3B3B3B] text-white data-[state=active]:text-[#2EA44F]">Reveal Secret</TabsTrigger>
