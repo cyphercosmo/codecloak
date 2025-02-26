@@ -1,17 +1,17 @@
-// The StegCloak library works by hiding secrets in invisible unicode characters
-// These zero-width characters can be embedded in plain text without being visible
+// The new steganography approach hides secrets in code comments instead of invisible characters
+// This makes it more compatible across different platforms and code editors
 
-// Import our browser-compatible StegCloak implementation
-import * as browserStegCloak from './browserStegCloak';
+// Import our comment-based steganography implementation
+import * as commentSteg from './commentSteg';
 
 /**
- * Hides a secret message in the given text using zero-width character steganography
+ * Hides a secret message in the given code using comments
  * @param sourceCode Source code to hide the secret in
  * @param secret Secret message to hide
  * @param password Password for encryption (optional)
  * @param encrypt Whether to encrypt the secret
- * @param integrity Whether to add integrity checking (ignored in browser implementation)
- * @returns Text with hidden secret
+ * @param integrity Whether to add integrity checking (ignored in this implementation)
+ * @returns Code with hidden secret in comments
  */
 export async function hideSecret(
   sourceCode: string, 
@@ -23,8 +23,8 @@ export async function hideSecret(
   try {
     console.log(`Hiding "${secret}" with password "${password}", encryption: ${encrypt}`);
     
-    // Use our browser-compatible implementation
-    const result = browserStegCloak.hide(sourceCode, secret, password, encrypt);
+    // Use our comment-based implementation
+    const result = commentSteg.hide(sourceCode, secret, password, encrypt);
     return result;
   } catch (error) {
     console.error("Error hiding secret:", error);
@@ -33,8 +33,8 @@ export async function hideSecret(
 }
 
 /**
- * Reveals a secret message hidden in the given text
- * @param encodedText Text with hidden secret
+ * Reveals a secret message hidden in code comments
+ * @param encodedText Code with hidden secret
  * @param password Password for decryption (if encryption was used)
  * @returns Revealed secret message
  */
@@ -45,8 +45,8 @@ export async function revealSecret(
   try {
     console.log(`Revealing secret with password "${password}"`);
     
-    // Use our browser-compatible implementation
-    const result = browserStegCloak.reveal(encodedText, password);
+    // Use our comment-based implementation
+    const result = commentSteg.reveal(encodedText, password);
     return result;
   } catch (error) {
     console.error("Error revealing secret:", error);
