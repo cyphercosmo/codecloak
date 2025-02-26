@@ -1,6 +1,13 @@
 /**
  * This is a simplified browser-compatible implementation of StegCloak
  * that uses zero-width unicode characters to hide messages in text.
+ * 
+ * NOTE: This implementation is currently NOT being used in the application.
+ * We're using the comment-based approach (commentSteg.ts) instead because it's
+ * more reliable across different platforms and code editors.
+ * 
+ * This file is kept for reference and potential future use if we implement
+ * a toggle between steganography methods.
  */
 
 // Zero-width characters for steganography

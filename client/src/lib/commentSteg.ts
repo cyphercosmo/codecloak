@@ -1,6 +1,10 @@
 /**
  * This module implements a steganography technique that hides secrets in code comments
  * No special characters are used, making it more compatible across different environments
+ * 
+ * This approach is used as the primary method for hiding secrets in code.
+ * Unlike zero-width character approaches, this works well across various
+ * code editors, IDEs, and platforms without losing the hidden data.
  */
 
 /**

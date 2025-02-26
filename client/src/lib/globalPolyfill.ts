@@ -1,6 +1,11 @@
 /**
+ * DEPRECATED - NOT CURRENTLY USED
+ * 
  * This file provides browser polyfills for Node.js-specific globals
  * that StegCloak depends on.
+ * 
+ * It is no longer imported in main.tsx, but we're keeping it for
+ * reference. The Buffer API is now provided by the 'buffer' npm package.
  */
 
 // Import Buffer from the 'buffer' package that's already installed

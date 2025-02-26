@@ -1,7 +1,9 @@
-// The new steganography approach hides secrets in code comments instead of invisible characters
-// This makes it more compatible across different platforms and code editors
+/**
+ * This module provides an interface for hiding secrets in code comments
+ * This approach is more compatible across different platforms and code editors
+ * than using zero-width characters
+ */
 
-// Import our comment-based steganography implementation
 import * as commentSteg from './commentSteg';
 
 /**
