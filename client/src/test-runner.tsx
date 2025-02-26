@@ -87,12 +87,32 @@ export default function TestRunner() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <Tabs defaultValue="unit" className="mb-4" onValueChange={(value) => setTestType(value as 'original' | 'unit')}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="unit">Unit Tests</TabsTrigger>
+              <TabsTrigger value="original">Basic Tests</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="unit">
+              <p className="text-sm text-gray-500 mb-4">
+                These structured unit tests help identify issues with the steganography implementation,
+                focusing on error identification and edge cases.
+              </p>
+            </TabsContent>
+            
+            <TabsContent value="original">
+              <p className="text-sm text-gray-500 mb-4">
+                The original test suite that performs basic functionality testing of the steganography systems.
+              </p>
+            </TabsContent>
+          </Tabs>
+          
           <Button 
             onClick={handleRunTests} 
             disabled={isRunning}
             className="mb-4"
           >
-            {isRunning ? "Running Tests..." : "Run Steganography Tests"}
+            {isRunning ? "Running Tests..." : `Run ${testType === 'unit' ? 'Unit' : 'Basic'} Tests`}
           </Button>
           
           <div 
@@ -102,14 +122,18 @@ export default function TestRunner() {
             {results.map((line, index) => {
               const isPass = line.includes('✅ PASS');
               const isFail = line.includes('❌ FAIL');
-              const isHeading = line.includes('-----');
+              const isHeading = line.includes('-----') || line.includes('====');
+              const isSuccess = line.includes('- ✓ Success');
+              const isWarning = line.includes('- ⚠️ Warning');
               
               return (
                 <div 
                   key={index} 
                   className={`${isPass ? 'text-green-600 dark:text-green-400' : ''} 
                               ${isFail ? 'text-red-600 dark:text-red-400 font-semibold' : ''} 
-                              ${isHeading ? 'font-bold mt-2' : ''}`}
+                              ${isHeading ? 'font-bold mt-2' : ''}
+                              ${isSuccess ? 'text-green-600 dark:text-green-400' : ''}
+                              ${isWarning ? 'text-amber-600 dark:text-amber-400' : ''}`}
                 >
                   {line}
                 </div>
