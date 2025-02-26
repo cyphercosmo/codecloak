@@ -1,24 +1,8 @@
 // The StegCloak library works by hiding secrets in invisible unicode characters
 // These zero-width characters can be embedded in plain text without being visible
-import './bufferPolyfill'; // Import our Buffer polyfill for browser compatibility
 
-// Create a placeholder with fallback for StegCloak
-let StegCloakInstance: any = null;
-
-// This function ensures StegCloak is loaded only once
-async function getStegCloak() {
-  if (StegCloakInstance) return StegCloakInstance;
-  
-  try {
-    // Dynamic import with error handling
-    const module = await import('stegcloak');
-    StegCloakInstance = module.default;
-    return StegCloakInstance;
-  } catch (error) {
-    console.error("Error loading StegCloak:", error);
-    throw new Error("Failed to load StegCloak library");
-  }
-}
+// Import our custom StegCloak wrapper implementation that works in the browser
+import StegCloakWrapper from './StegCloakWrapper';
 
 /**
  * Hides a secret message in the given text using StegCloak
@@ -37,11 +21,8 @@ export async function hideSecret(
   integrity: boolean = false
 ): Promise<string> {
   try {
-    // Get the StegCloak constructor
-    const StegCloak = await getStegCloak();
-    
-    // Initialize the StegCloak library with encryption and integrity options
-    const stegcloak = new StegCloak(encrypt, integrity);
+    // Create a fresh StegCloak wrapper with the specified encryption settings
+    const stegcloak = new StegCloakWrapper(encrypt, integrity);
     
     // Hide the secret message in the code
     // StegCloak uses zero-width characters which are invisible to the human eye
@@ -51,7 +32,7 @@ export async function hideSecret(
     return stegcloak.hide(secret, password, sourceCode);
   } catch (error) {
     console.error("Error hiding secret:", error);
-    throw new Error("Failed to hide secret in code. StegCloak could not be initialized properly.");
+    throw new Error("Failed to hide secret in code. Please try again or check your inputs.");
   }
 }
 
@@ -66,11 +47,8 @@ export async function revealSecret(
   password: string
 ): Promise<string> {
   try {
-    // Get the StegCloak constructor
-    const StegCloak = await getStegCloak();
-    
-    // Initialize the StegCloak library (encryption settings are detected automatically)
-    const stegcloak = new StegCloak();
+    // Create a fresh instance - the wrapper will auto-detect encryption
+    const stegcloak = new StegCloakWrapper();
     
     // Reveal the hidden secret
     console.log(`Revealing secret with password "${password}"`);
