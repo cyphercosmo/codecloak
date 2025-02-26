@@ -138,15 +138,7 @@ export default function Home() {
           </p>
         </div>
         
-        <Alert className="mb-6 bg-[#F0F3F6] text-[#24292F] border-[#2EA44F]">
-          <FaInfoCircle className="h-4 w-4 text-[#2EA44F]" />
-          <AlertTitle>Demo Mode</AlertTitle>
-          <AlertDescription>
-            This is a demo implementation. In a real application, this would use the StegCloak library to hide messages 
-            with zero-width unicode characters that are completely invisible. For this demo, we're simulating the 
-            functionality by adding comments to the code.
-          </AlertDescription>
-        </Alert>
+
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <InputPanel 

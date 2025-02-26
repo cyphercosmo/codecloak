@@ -113,22 +113,28 @@ export default function InputPanel({
           </div>
           
           <div className="flex flex-wrap gap-4">
-            <div className="flex items-center">
-              <Checkbox 
-                id="enable-encryption" 
-                className="mr-2"
-                checked={isEncryptionEnabled}
-                onCheckedChange={(checked) => setIsEncryptionEnabled(checked === true)}
-              />
+            <div className="flex items-center space-x-2">
+              <div className="h-4 w-4 bg-white rounded flex items-center justify-center">
+                <input 
+                  type="checkbox" 
+                  id="enable-encryption"
+                  checked={isEncryptionEnabled}
+                  onChange={(e) => setIsEncryptionEnabled(e.target.checked)}
+                  className="h-3 w-3"
+                />
+              </div>
               <Label htmlFor="enable-encryption" className="text-white text-sm">Enable Encryption</Label>
             </div>
-            <div className="flex items-center">
-              <Checkbox 
-                id="enable-integrity" 
-                className="mr-2"
-                checked={isIntegrityEnabled}
-                onCheckedChange={(checked) => setIsIntegrityEnabled(checked === true)}
-              />
+            <div className="flex items-center space-x-2">
+              <div className="h-4 w-4 bg-white rounded flex items-center justify-center">
+                <input 
+                  type="checkbox" 
+                  id="enable-integrity"
+                  checked={isIntegrityEnabled}
+                  onChange={(e) => setIsIntegrityEnabled(e.target.checked)}
+                  className="h-3 w-3"
+                />
+              </div>
               <Label htmlFor="enable-integrity" className="text-white text-sm">Enable HMAC Integrity</Label>
             </div>
           </div>
