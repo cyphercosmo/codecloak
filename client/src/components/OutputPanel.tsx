@@ -46,7 +46,7 @@ export default function OutputPanel({
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col">
       <div className="bg-[#2D2D2D] text-white px-4 py-3 flex justify-between items-center">
         <h3 className="font-medium">Output</h3>
         <div>
@@ -61,8 +61,8 @@ export default function OutputPanel({
         </div>
       </div>
       
-      <div className="p-4 bg-[#2D2D2D]">
-        <div className="border border-[#6E7681] border-opacity-30 rounded-md overflow-hidden mb-4">
+      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col">
+        <div className="border border-[#6E7681] border-opacity-30 rounded-md overflow-hidden mb-4 flex-1">
           {encodeSuccess && (
             <div className="bg-[#F0F3F6] bg-opacity-10 p-3 text-white text-sm">
               <div className="flex items-start">
@@ -79,7 +79,7 @@ export default function OutputPanel({
             value={encodedOutput || "// Your encoded result will appear here"}
             onChange={() => {}}
             readOnly={true}
-            className="bg-[#2D2D2D] text-white p-3 overflow-auto max-h-[400px] font-mono text-sm"
+            className="bg-[#2D2D2D] text-white p-3 h-full font-mono text-sm"
           />
         </div>
         

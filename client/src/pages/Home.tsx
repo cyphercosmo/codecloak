@@ -127,7 +127,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F6F8FA]">
       <Header />
-      <main className="container mx-auto p-4 flex-1">
+      <main className="container mx-auto p-4 flex-1 flex flex-col">
         <div className="mb-8 text-center max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold mb-3 text-[#24292F]">Hide Secrets in Plain Code</h2>
           <p className="text-[#6E7681]">
@@ -135,9 +135,7 @@ export default function Home() {
           </p>
         </div>
         
-
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 flex-1">
           <InputPanel 
             sourceCode={sourceCode}
             setSourceCode={setSourceCode}

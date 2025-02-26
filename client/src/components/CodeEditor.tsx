@@ -54,6 +54,7 @@ export default function CodeEditor({
       style={{ 
         fontFamily: "Monaco, SF Mono, Fira Code, monospace",
         minHeight: "200px",
+        height: "100%",
         backgroundColor: "#2D2D2D", 
         color: "white",
         outline: "none"
