@@ -7,6 +7,8 @@ import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaInfoCircle } from "react-icons/fa";
+// Import the StegCloak functions
+import { hideSecret, revealSecret } from "@/lib/stegcloak";
 
 export default function Home() {
   const { toast } = useToast();
@@ -51,8 +53,7 @@ export default function Home() {
     }
     
     try {
-      // Import is done dynamically to avoid server-side issues
-      const { hideSecret } = await import("@/lib/stegcloak");
+      // Use the imported hideSecret function
       const result = await hideSecret(sourceCode, secretMessage, password, isEncryptionEnabled, isIntegrityEnabled);
       setEncodedOutput(result);
       setEncodeSuccess(true);
@@ -90,8 +91,7 @@ export default function Home() {
     }
     
     try {
-      // Import is done dynamically to avoid server-side issues
-      const { revealSecret } = await import("@/lib/stegcloak");
+      // Use the imported revealSecret function
       const revealed = await revealSecret(encodedOutput, revealPassword);
       setRevealedSecret(revealed);
       setRevealSuccess(true);
