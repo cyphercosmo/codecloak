@@ -22,7 +22,7 @@ export default function Home() {
   const [revealedSecret, setRevealedSecret] = useState<string>("");
   const [revealSuccess, setRevealSuccess] = useState<boolean>(false);
   
-  const handleEncode = () => {
+  const handleEncode = async () => {
     if (!sourceCode.trim()) {
       toast({
         title: "Error",
@@ -50,18 +50,16 @@ export default function Home() {
       return;
     }
     
-    // This would call the stegcloak library for actual encoding
     try {
       // Import is done dynamically to avoid server-side issues
-      import("@/lib/stegcloak").then(({ hideSecret }) => {
-        const result = hideSecret(sourceCode, secretMessage, password, isEncryptionEnabled, isIntegrityEnabled);
-        setEncodedOutput(result);
-        setEncodeSuccess(true);
-        setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
-        toast({
-          title: "Success",
-          description: "Secret message hidden successfully",
-        });
+      const { hideSecret } = await import("@/lib/stegcloak");
+      const result = await hideSecret(sourceCode, secretMessage, password, isEncryptionEnabled, isIntegrityEnabled);
+      setEncodedOutput(result);
+      setEncodeSuccess(true);
+      setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
+      toast({
+        title: "Success",
+        description: "Secret message hidden successfully using zero-width characters",
       });
     } catch (error) {
       toast({
@@ -72,7 +70,7 @@ export default function Home() {
     }
   };
   
-  const handleReveal = () => {
+  const handleReveal = async () => {
     if (!encodedOutput) {
       toast({
         title: "Error",
@@ -93,14 +91,13 @@ export default function Home() {
     
     try {
       // Import is done dynamically to avoid server-side issues
-      import("@/lib/stegcloak").then(({ revealSecret }) => {
-        const revealed = revealSecret(encodedOutput, revealPassword);
-        setRevealedSecret(revealed);
-        setRevealSuccess(true);
-        toast({
-          title: "Success",
-          description: "Secret message revealed",
-        });
+      const { revealSecret } = await import("@/lib/stegcloak");
+      const revealed = await revealSecret(encodedOutput, revealPassword);
+      setRevealedSecret(revealed);
+      setRevealSuccess(true);
+      toast({
+        title: "Success",
+        description: "Secret message revealed successfully",
       });
     } catch (error) {
       toast({
@@ -134,7 +131,7 @@ export default function Home() {
         <div className="mb-8 text-center max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold mb-3 text-[#24292F]">Hide Secrets in Plain Code</h2>
           <p className="text-[#6E7681]">
-            CodeCloak embeds your secret messages into code snippets using invisible unicode characters, without affecting the code's functionality or appearance.
+            CodeCloak embeds your secret messages into code snippets using invisible unicode characters, without affecting the code's functionality or appearance. Your secrets are hidden using zero-width unicode characters that are completely invisible.
           </p>
         </div>
         
