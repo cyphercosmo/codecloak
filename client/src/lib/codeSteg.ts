@@ -26,33 +26,66 @@ function binaryToText(binary: string): string {
 }
 
 /**
- * Encrypt a message with a more reliable method
+ * Helper function to convert string to base64
+ */
+function stringToBase64(str: string): string {
+  try {
+    // Use browser's built-in btoa function for base64 encoding
+    return btoa(unescape(encodeURIComponent(str)));
+  } catch (e) {
+    // Fallback implementation for characters outside ASCII range
+    const bytes = new TextEncoder().encode(str);
+    return Array.from(bytes)
+      .map(byte => String.fromCharCode(byte))
+      .join('');
+  }
+}
+
+/**
+ * Helper function to convert base64 to string
+ */
+function base64ToString(base64: string): string {
+  try {
+    // Use browser's built-in atob function for base64 decoding
+    return decodeURIComponent(escape(atob(base64)));
+  } catch (e) {
+    // Fallback implementation
+    return base64;
+  }
+}
+
+/**
+ * Encrypt a message with a simple yet reliable Base64 + XOR approach
  */
 function encryptMessage(message: string, password: string): string {
   if (!password) return message;
   
+  // Convert the message to Base64 first
+  const base64Message = stringToBase64(message);
+  
   // Create a repeating key from the password
   let key = '';
-  while (key.length < message.length) {
+  while (key.length < base64Message.length) {
     key += password;
   }
-  key = key.slice(0, message.length);
+  key = key.slice(0, base64Message.length);
   
-  // Simple character shifting encryption
+  // Simple XOR based encryption
   let encrypted = '';
-  for (let i = 0; i < message.length; i++) {
-    const messageChar = message.charCodeAt(i);
-    const keyChar = key.charCodeAt(i % key.length);
-    // Convert to a number 0-255, shift, and wrap around
-    const encryptedChar = (messageChar + keyChar) % 256;
-    encrypted += String.fromCharCode(encryptedChar);
+  for (let i = 0; i < base64Message.length; i++) {
+    // Use password to modify the character with a simple XOR-like operation
+    const messageCode = base64Message.charCodeAt(i);
+    const keyCode = key.charCodeAt(i % key.length);
+    // Keep the result within printable ASCII range (32-126)
+    const encryptedCode = ((messageCode + keyCode) % 95) + 32;
+    encrypted += String.fromCharCode(encryptedCode);
   }
   
   return encrypted;
 }
 
 /**
- * Decrypt a message with a more reliable method
+ * Decrypt a message with a simple yet reliable Base64 + XOR approach
  */
 function decryptMessage(encrypted: string, password: string): string {
   if (!password) return encrypted;
@@ -64,18 +97,26 @@ function decryptMessage(encrypted: string, password: string): string {
   }
   key = key.slice(0, encrypted.length);
   
-  // Simple character shifting decryption
+  // Reverse the XOR based encryption
   let decrypted = '';
   for (let i = 0; i < encrypted.length; i++) {
-    const encryptedChar = encrypted.charCodeAt(i);
-    const keyChar = key.charCodeAt(i % key.length);
-    // Reverse the shift and handle wrap around
-    let decryptedChar = (encryptedChar - keyChar) % 256;
-    if (decryptedChar < 0) decryptedChar += 256;
-    decrypted += String.fromCharCode(decryptedChar);
+    const encryptedCode = encrypted.charCodeAt(i);
+    const keyCode = key.charCodeAt(i % key.length);
+    // Reverse the operation, keeping within printable ASCII range (32-126)
+    let decryptedCode = encryptedCode - keyCode;
+    while (decryptedCode < 32) {
+      decryptedCode += 95;
+    }
+    decrypted += String.fromCharCode(decryptedCode);
   }
   
-  return decrypted;
+  // Convert from Base64 back to the original string
+  try {
+    return base64ToString(decrypted);
+  } catch (e) {
+    console.log("Error decoding Base64:", e);
+    return decrypted; // Return raw decrypted text if Base64 decoding fails
+  }
 }
 
 // Characters for our encoding - each set has 64 characters (6 bits)
