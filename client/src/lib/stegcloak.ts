@@ -6,7 +6,8 @@ import * as browserStegCloak from './browserStegCloak';
 import * as codeSteg from './codeSteg';
 
 // Flag to determine which implementation to use
-const USE_CODE_STEG = true; // Set to true to use the code-based approach, false for zero-width chars
+// We're using both approaches together for better compatibility
+const USE_CODE_STEG = true; // For encoding we use both code-based and zero-width approaches
 
 /**
  * Hides a secret message in the given text using code-based steganography
@@ -27,13 +28,36 @@ export async function hideSecret(
   try {
     console.log(`Hiding "${secret}" with password "${password}", encryption: ${encrypt}`);
     
+    // First apply code-based steganography
+    let processedCode = sourceCode;
+    
     if (USE_CODE_STEG) {
-      // Use our code-based steganography implementation
-      return codeSteg.hideInCode(sourceCode, secret, password, encrypt);
-    } else {
-      // Use the zero-width character implementation
-      return browserStegCloak.hide(sourceCode, secret, password, encrypt);
+      try {
+        // Use our code-based steganography implementation
+        processedCode = codeSteg.hideInCode(sourceCode, secret, password, encrypt);
+        console.log("Successfully applied code-based steganography");
+      } catch (error) {
+        console.error("Error with code-based hiding, will still try zero-width approach:", error);
+        processedCode = sourceCode; // Fallback to original code
+      }
     }
+    
+    // Then add zero-width characters as well for better compatibility
+    try {
+      // Add zero-width characters to the already processed code
+      processedCode = browserStegCloak.hide(processedCode, secret, password, encrypt);
+      console.log("Successfully applied zero-width steganography");
+    } catch (error) {
+      console.error("Error with zero-width hiding:", error);
+      // If this fails but we already have code-based steganography, we can continue
+      if (processedCode !== sourceCode) {
+        console.log("Will use only code-based steganography");
+        return processedCode;
+      }
+      throw error; // If both methods failed, propagate the error
+    }
+    
+    return processedCode;
   } catch (error) {
     console.error("Error hiding secret:", error);
     throw new Error("Failed to hide secret in code. Please try again or check your inputs.");

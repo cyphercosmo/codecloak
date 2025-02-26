@@ -7,8 +7,10 @@
 const ZWSP = '\u200B'; // Zero-width space
 const ZWNJ = '\u200C'; // Zero-width non-joiner
 const ZWJ = '\u200D';  // Zero-width joiner
-const MARKER_START = ZWJ + ZWSP + ZWJ; // Marker for start of hidden content
-const MARKER_END = ZWJ + ZWNJ + ZWJ; // Marker for end of hidden content
+const LRE = '\u202A';  // Left-to-right embedding
+const PDF = '\u202C';  // Pop directional formatting
+const MARKER_START = ZWJ + ZWSP + ZWJ + LRE; // Enhanced marker for start of hidden content
+const MARKER_END = PDF + ZWJ + ZWNJ + ZWJ; // Enhanced marker for end of hidden content
 
 /**
  * Simple function to convert a string to binary
@@ -172,8 +174,14 @@ export function hide(
     message = encryptMessage(message, password);
   }
   
+  // Add a simple tag to help identify the real message
+  if (!message.startsWith('STEG:')) {
+    message = 'STEG:' + message;
+  }
+  
   // Convert the message to binary and then to zero-width chars
   const messageBinary = textToBinary(message);
+  console.log(`Message binary length: ${messageBinary.length} bits`);
   const zeroWidthMessage = MARKER_START + binaryToZeroWidth(messageBinary) + MARKER_END;
   
   // Find a comment line to embed the secret into
@@ -254,32 +262,56 @@ export function reveal(
     throw new Error('No zero-width characters found in the text.');
   }
   
+  console.log(`Found ${zeroWidthChars.length} zero-width characters`);
+  
   // Convert zero-width characters to binary and then to text
   const binary = zeroWidthToBinary(zeroWidthChars);
   if (binary.length === 0) {
     throw new Error('Failed to extract binary data from zero-width characters.');
   }
   
+  console.log(`Extracted ${binary.length} bits of binary data`);
+  
   try {
     // Try to convert the binary to readable text
     let message = binaryToText(binary);
+    console.log(`Raw decoded message: ${message.slice(0, 20)}${message.length > 20 ? '...' : ''}`);
     
     // Decrypt if password provided
     if (password) {
       try {
         message = decryptMessage(message, password);
+        console.log(`Decrypted message: ${message.slice(0, 20)}${message.length > 20 ? '...' : ''}`);
       } catch (decryptError) {
+        console.error("Decryption error:", decryptError);
         throw new Error('Failed to decrypt message with provided password.');
       }
     }
     
-    // Validate that we actually got meaningful text
-    if (message && message.length > 0 && /^[\x20-\x7E]+$/.test(message)) {
-      return message;
-    } else {
-      throw new Error('Message extracted is not valid text. Password may be incorrect.');
+    // Check for the 'STEG:' prefix and remove it
+    if (message.startsWith('STEG:')) {
+      message = message.substring(5);
+      console.log("Found STEG prefix, extracting actual message");
     }
+    
+    // Validate that we actually got meaningful text
+    if (message && message.length > 0) {
+      // Looser validation to allow more characters
+      if (/^[\x20-\x7E\u0080-\uFFFF]+$/.test(message)) {
+        return message;
+      } else {
+        console.log("Message contains invalid characters, might be corrupted");
+        // Try to extract only the valid part
+        const validChars = message.match(/[\x20-\x7E\u0080-\uFFFF]+/g) || [];
+        if (validChars.length > 0) {
+          return validChars.join('');
+        }
+      }
+    } 
+    
+    throw new Error('Message extracted is not valid text. Password may be incorrect.');
   } catch (error) {
+    console.error("Error in reveal process:", error);
     if (error instanceof Error) {
       throw error;
     }
