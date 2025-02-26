@@ -104,36 +104,7 @@ function extractZeroWidth(text: string): string {
 }
 
 /**
- * Helper function to convert string to base64
- */
-function stringToBase64(str: string): string {
-  try {
-    // Use browser's built-in btoa function for base64 encoding
-    return btoa(unescape(encodeURIComponent(str)));
-  } catch (e) {
-    // Fallback implementation for characters outside ASCII range
-    const bytes = new TextEncoder().encode(str);
-    return Array.from(bytes)
-      .map(byte => String.fromCharCode(byte))
-      .join('');
-  }
-}
-
-/**
- * Helper function to convert base64 to string
- */
-function base64ToString(base64: string): string {
-  try {
-    // Use browser's built-in atob function for base64 decoding
-    return decodeURIComponent(escape(atob(base64)));
-  } catch (e) {
-    // Fallback implementation
-    return base64;
-  }
-}
-
-/**
- * Encrypt a message with a simple yet reliable Base64 + XOR approach
+ * Super simple encryption - no Base64, just direct XOR
  * @param message The message to encrypt
  * @param password The password for encryption
  * @returns Encrypted message
@@ -141,32 +112,23 @@ function base64ToString(base64: string): string {
 function encryptMessage(message: string, password: string): string {
   if (!password) return message;
   
-  // Convert the message to Base64 first
-  const base64Message = stringToBase64(message);
+  // Simple prefix to help identify encoded messages
+  message = "STEG:" + message;
   
-  // Create a repeating key from the password
-  let key = '';
-  while (key.length < base64Message.length) {
-    key += password;
-  }
-  key = key.slice(0, base64Message.length);
-  
-  // Simple XOR based encryption
-  let encrypted = '';
-  for (let i = 0; i < base64Message.length; i++) {
-    // Use password to modify the character with a simple XOR-like operation
-    const messageCode = base64Message.charCodeAt(i);
-    const keyCode = key.charCodeAt(i % key.length);
-    // Keep the result within printable ASCII range (32-126)
-    const encryptedCode = ((messageCode + keyCode) % 95) + 32;
-    encrypted += String.fromCharCode(encryptedCode);
+  // Directly use UTF-16 code points
+  let result = '';
+  for (let i = 0; i < message.length; i++) {
+    const char = message.charCodeAt(i);
+    const keyChar = password.charCodeAt(i % password.length);
+    // Simple XOR operation (reliable and reversible)
+    result += String.fromCharCode(char ^ keyChar);
   }
   
-  return encrypted;
+  return result;
 }
 
 /**
- * Decrypt a message with a simple yet reliable Base64 + XOR approach
+ * Super simple decryption - no Base64, just direct XOR
  * @param encrypted The encrypted message
  * @param password The password for decryption
  * @returns Decrypted message
@@ -174,33 +136,21 @@ function encryptMessage(message: string, password: string): string {
 function decryptMessage(encrypted: string, password: string): string {
   if (!password) return encrypted;
   
-  // Create a repeating key from the password
-  let key = '';
-  while (key.length < encrypted.length) {
-    key += password;
-  }
-  key = key.slice(0, encrypted.length);
-  
-  // Reverse the XOR based encryption
-  let decrypted = '';
+  // Directly use UTF-16 code points
+  let result = '';
   for (let i = 0; i < encrypted.length; i++) {
-    const encryptedCode = encrypted.charCodeAt(i);
-    const keyCode = key.charCodeAt(i % key.length);
-    // Reverse the operation, keeping within printable ASCII range (32-126)
-    let decryptedCode = encryptedCode - keyCode;
-    while (decryptedCode < 32) {
-      decryptedCode += 95;
-    }
-    decrypted += String.fromCharCode(decryptedCode);
+    const char = encrypted.charCodeAt(i);
+    const keyChar = password.charCodeAt(i % password.length);
+    // Simple XOR operation (reliable and reversible)
+    result += String.fromCharCode(char ^ keyChar);
   }
   
-  // Convert from Base64 back to the original string
-  try {
-    return base64ToString(decrypted);
-  } catch (e) {
-    console.log("Error decoding Base64:", e);
-    return decrypted; // Return raw decrypted text if Base64 decoding fails
+  // Remove the prefix if it exists
+  if (result.startsWith('STEG:')) {
+    return result.substring(5);
   }
+  
+  return result;
 }
 
 /**
