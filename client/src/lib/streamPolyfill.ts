@@ -1,6 +1,12 @@
 /**
- * This file provides a minimal polyfill for the stream.Transform class
- * that StegCloak depends on.
+ * DEPRECATED - NOT CURRENTLY USED
+ * 
+ * This file provided a minimal polyfill for the stream.Transform class
+ * that the npm StegCloak package depended on.
+ * 
+ * Since we've switched to our own custom implementation that doesn't
+ * use Node.js streams, this polyfill is no longer needed. It's no longer
+ * imported in main.tsx, but we're keeping it for reference.
  */
 
 // Create a minimal mock of the Transform class

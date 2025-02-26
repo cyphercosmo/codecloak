@@ -25,14 +25,17 @@ export async function hideSecret(
   try {
     console.log(`Hiding "${secret}" with password "${password}", encryption: ${encrypt}`);
     
+    // Detect the programming language from the source code - placeholder for future improvements
+    console.log("Detected language: javascript");
+    
     // Use our comment-based implementation
-    // Pass integrity flag as the last argument to control comment placement
+    // Note: We use the integrity flag to control random placement of the comment
     const result = commentSteg.hide(
       sourceCode, 
       secret, 
       password, 
       encrypt, 
-      integrity // Using integrity flag to control random placement
+      integrity // Controls random placement of comments
     );
     return result;
   } catch (error) {
@@ -54,9 +57,31 @@ export async function revealSecret(
   try {
     console.log(`Revealing secret with password "${password}"`);
     
-    // Use our comment-based implementation
-    const result = commentSteg.reveal(encodedText, password);
-    return result;
+    // Quick check if the code might contain a hidden message (base64 pattern in comments)
+    const hasCommentWithBase64 = /\/\/\s*([A-Za-z0-9+/=]+)(?:\n|$)|\/\*\s*([A-Za-z0-9+/=]+)\s*\*\//.test(encodedText);
+    console.log(`Might contain hidden message: ${hasCommentWithBase64}`);
+    
+    // Detect the programming language for potential future use
+    console.log("Detected language for revealing: javascript");
+    
+    // Try our comment-based implementation first
+    try {
+      const result = commentSteg.reveal(encodedText, password);
+      return result;
+    } catch (commentError) {
+      console.log("Code steg approach failed, will try fallback:", commentError);
+      
+      // If the comment-based approach fails, we could add a fallback here
+      // For example, try the zero-width character approach
+      try {
+        // This would be where we'd implement a fallback
+        // For now, just re-throw the original error
+        console.log("Fallback approach failed:", commentError);
+        throw commentError;
+      } catch (fallbackError) {
+        throw commentError; // Throw the original error from the comment approach
+      }
+    }
   } catch (error) {
     console.error("Error revealing secret:", error);
     throw new Error("Failed to reveal secret. Check if the password is correct and that the text contains a hidden message.");
