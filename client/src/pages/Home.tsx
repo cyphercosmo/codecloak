@@ -135,7 +135,7 @@ export default function Home() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 flex-1 min-h-[600px]">
           <InputPanel 
             sourceCode={sourceCode}
             setSourceCode={setSourceCode}

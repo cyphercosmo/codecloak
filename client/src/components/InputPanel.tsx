@@ -47,7 +47,7 @@ export default function InputPanel({
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col">
+    <div className="bg-white rounded-lg shadow-md flex flex-col h-full">
       <div className="bg-[#2D2D2D] text-white px-4 py-3 flex justify-between items-center">
         <h3 className="font-medium">Input</h3>
         <div className="flex space-x-2">
@@ -70,12 +70,12 @@ export default function InputPanel({
         </div>
       </div>
       
-      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col">
-        <div className="border border-[#6E7681] border-opacity-30 rounded-md mb-4 overflow-hidden flex-1">
+      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col overflow-auto">
+        <div className="border border-[#6E7681] border-opacity-30 rounded-md mb-4 flex-1">
           <CodeEditor
             value={sourceCode}
             onChange={setSourceCode}
-            className="bg-[#2D2D2D] text-white p-3 h-full font-mono text-sm"
+            className="bg-[#2D2D2D] text-white p-3 font-mono text-sm"
           />
         </div>
         

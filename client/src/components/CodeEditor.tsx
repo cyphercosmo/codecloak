@@ -57,7 +57,9 @@ export default function CodeEditor({
         height: "100%",
         backgroundColor: "#2D2D2D", 
         color: "white",
-        outline: "none"
+        outline: "none",
+        overflowY: "auto",
+        maxHeight: "400px" // Add max-height to enable scrolling
       }}
     />
   );
