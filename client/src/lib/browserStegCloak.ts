@@ -65,9 +65,15 @@ function zeroWidthToBinary(zeroWidth: string): string {
  * @returns String containing only zero-width characters between markers
  */
 function extractZeroWidth(text: string): string {
+  if (!text || typeof text !== 'string') {
+    console.log("Invalid text provided for extractZeroWidth", text);
+    return '';
+  }
+  
   // Look for marker start and end
   const startIndex = text.indexOf(MARKER_START);
   if (startIndex === -1) {
+    console.log("No marker start found, trying fallback method");
     // Try the old method if no markers found - backward compatibility
     let result = '';
     for (let i = 0; i < text.length; i++) {
@@ -76,16 +82,23 @@ function extractZeroWidth(text: string): string {
         result += char;
       }
     }
+    
+    if (result.length > 0) {
+      console.log(`Found ${result.length} zero-width characters without markers`);
+    }
     return result;
   }
   
   const endIndex = text.indexOf(MARKER_END, startIndex + MARKER_START.length);
   if (endIndex === -1) {
+    console.log("Found start marker but no end marker");
     throw new Error('Corrupted message: start marker found but no end marker');
   }
   
   // Extract only the content between markers
-  return text.substring(startIndex + MARKER_START.length, endIndex);
+  const content = text.substring(startIndex + MARKER_START.length, endIndex);
+  console.log(`Found ${content.length} zero-width characters between markers`);
+  return content;
 }
 
 /**
@@ -231,24 +244,45 @@ export function reveal(
   password: string = ''
 ): string {
   if (!text) {
-    return '';
+    throw new Error('Empty text provided for revealing.');
   }
   
   // Extract only the zero-width characters
   const zeroWidthChars = extractZeroWidth(text);
   
-  if (!zeroWidthChars) {
-    throw new Error('No hidden message found in the text.');
+  if (!zeroWidthChars || zeroWidthChars.length === 0) {
+    throw new Error('No zero-width characters found in the text.');
   }
   
   // Convert zero-width characters to binary and then to text
   const binary = zeroWidthToBinary(zeroWidthChars);
-  let message = binaryToText(binary);
-  
-  // Decrypt if password provided
-  if (password) {
-    message = decryptMessage(message, password);
+  if (binary.length === 0) {
+    throw new Error('Failed to extract binary data from zero-width characters.');
   }
   
-  return message;
+  try {
+    // Try to convert the binary to readable text
+    let message = binaryToText(binary);
+    
+    // Decrypt if password provided
+    if (password) {
+      try {
+        message = decryptMessage(message, password);
+      } catch (decryptError) {
+        throw new Error('Failed to decrypt message with provided password.');
+      }
+    }
+    
+    // Validate that we actually got meaningful text
+    if (message && message.length > 0 && /^[\x20-\x7E]+$/.test(message)) {
+      return message;
+    } else {
+      throw new Error('Message extracted is not valid text. Password may be incorrect.');
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to convert binary data to text.');
+  }
 }

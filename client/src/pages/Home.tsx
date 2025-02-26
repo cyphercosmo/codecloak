@@ -96,9 +96,10 @@ export default function Home() {
     
     try {
       // Show a processing toast
-      toast({
+      const processingToast = toast({
         title: "Processing",
         description: "Attempting to reveal secret...",
+        duration: 5000,
       });
       
       // Use the imported revealSecret function
@@ -117,11 +118,30 @@ export default function Home() {
         description: "Secret message revealed successfully",
       });
     } catch (error) {
-      console.error("Reveal error:", error);
+      console.error("Error revealing secret:", error);
+      
+      let errorMessage = "Failed to reveal any secret message";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      // Provide a friendly error message based on specific errors
+      if (errorMessage.includes("No zero-width characters found")) {
+        errorMessage = "No hidden message found using zero-width characters. Try a different password or text.";
+      } else if (errorMessage.includes("No comments found")) {
+        errorMessage = "No code comments found that might contain a hidden message.";
+      } else if (errorMessage.includes("binary data")) {
+        errorMessage = "Found potential hidden data but couldn't decode it. The password might be incorrect.";
+      } else if (errorMessage.includes("Password")) {
+        errorMessage = "Password appears to be incorrect for the hidden message.";
+      }
+      
       toast({
         title: "Could Not Reveal Secret",
-        description: error instanceof Error ? error.message : "Password may be incorrect or there's no hidden message",
+        description: errorMessage,
         variant: "destructive",
+        duration: 7000,
       });
     }
   };

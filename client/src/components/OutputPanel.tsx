@@ -64,8 +64,17 @@ export default function OutputPanel({
   
   // Check if code might contain hidden messages
   const mightContainSecret = (code: string): boolean => {
-    // Use the imported function to check for hidden messages
-    return mightContainHiddenMessage(code);
+    if (!code || code.trim() === '') {
+      return false;
+    }
+    
+    try {
+      // Use the imported function to check for hidden messages
+      return mightContainHiddenMessage(code);
+    } catch (error) {
+      console.error("Error checking for hidden messages:", error);
+      return false;
+    }
   };
   
   const handleCopy = async () => {
