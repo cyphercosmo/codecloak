@@ -104,7 +104,7 @@ function extractZeroWidth(text: string): string {
 }
 
 /**
- * Encrypt a message with a simple XOR cipher
+ * Encrypt a message with a more reliable method
  * @param message The message to encrypt
  * @param password The password for encryption
  * @returns Encrypted message
@@ -112,22 +112,28 @@ function extractZeroWidth(text: string): string {
 function encryptMessage(message: string, password: string): string {
   if (!password) return message;
   
-  let encrypted = '';
-  const passwordBinary = textToBinary(password);
-  const messageBinary = textToBinary(message);
+  // Create a repeating key from the password
+  let key = '';
+  while (key.length < message.length) {
+    key += password;
+  }
+  key = key.slice(0, message.length);
   
-  for (let i = 0; i < messageBinary.length; i++) {
-    const messageChar = messageBinary[i];
-    const passwordChar = passwordBinary[i % passwordBinary.length];
-    // XOR operation
-    encrypted += messageChar === passwordChar ? '0' : '1';
+  // Simple character shifting encryption
+  let encrypted = '';
+  for (let i = 0; i < message.length; i++) {
+    const messageChar = message.charCodeAt(i);
+    const keyChar = key.charCodeAt(i % key.length);
+    // Convert to a number 0-255, shift, and wrap around
+    const encryptedChar = (messageChar + keyChar) % 256;
+    encrypted += String.fromCharCode(encryptedChar);
   }
   
-  return binaryToText(encrypted);
+  return encrypted;
 }
 
 /**
- * Decrypt a message with a simple XOR cipher
+ * Decrypt a message with a more reliable method
  * @param encrypted The encrypted message
  * @param password The password for decryption
  * @returns Decrypted message
@@ -135,18 +141,25 @@ function encryptMessage(message: string, password: string): string {
 function decryptMessage(encrypted: string, password: string): string {
   if (!password) return encrypted;
   
-  let decrypted = '';
-  const passwordBinary = textToBinary(password);
-  const encryptedBinary = textToBinary(encrypted);
+  // Create a repeating key from the password
+  let key = '';
+  while (key.length < encrypted.length) {
+    key += password;
+  }
+  key = key.slice(0, encrypted.length);
   
-  for (let i = 0; i < encryptedBinary.length; i++) {
-    const encryptedChar = encryptedBinary[i];
-    const passwordChar = passwordBinary[i % passwordBinary.length];
-    // XOR operation
-    decrypted += encryptedChar === passwordChar ? '0' : '1';
+  // Simple character shifting decryption
+  let decrypted = '';
+  for (let i = 0; i < encrypted.length; i++) {
+    const encryptedChar = encrypted.charCodeAt(i);
+    const keyChar = key.charCodeAt(i % key.length);
+    // Reverse the shift and handle wrap around
+    let decryptedChar = (encryptedChar - keyChar) % 256;
+    if (decryptedChar < 0) decryptedChar += 256;
+    decrypted += String.fromCharCode(decryptedChar);
   }
   
-  return binaryToText(decrypted);
+  return decrypted;
 }
 
 /**
