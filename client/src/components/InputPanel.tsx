@@ -137,7 +137,7 @@ export default function InputPanel({
                   className="h-3 w-3"
                 />
               </div>
-              <Label htmlFor="enable-integrity" className="text-white text-sm">Enable HMAC Integrity</Label>
+              <Label htmlFor="enable-integrity" className="text-white text-sm">Random Comment Placement</Label>
             </div>
           </div>
           

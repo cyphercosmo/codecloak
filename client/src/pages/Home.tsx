@@ -110,7 +110,7 @@ export default function Home() {
   };
   
   const handleClear = () => {
-    setSourceCode("// Enter your code here");
+    setSourceCode("/**\n * A simple greeting function\n * @param {string} name - The name to greet\n */\nfunction greet(name) {\n  // Return a template string with the name\n  return `Hello, ${name}!`;\n}\n\n// Call the function with 'Developer'\nconsole.log(greet('Developer'));");
     setSecretMessage("");
     setPassword("");
     setRevealPassword("");

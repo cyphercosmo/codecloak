@@ -59,7 +59,8 @@ export function hide(
   sourceCode: string,
   secret: string,
   password: string = '',
-  encrypt: boolean = true
+  encrypt: boolean = true,
+  randomPlacement: boolean = false
 ): string {
   if (!secret) {
     return sourceCode;
@@ -68,19 +69,21 @@ export function hide(
   // Encrypt the message if requested
   const payload = encrypt && password ? encryptMessage(secret, password) : Buffer.from(secret).toString('base64');
   
-  // Generate a random position to insert the comment
-  // This could be improved to find logical positions within the code
+  // Split the source code into lines
   const lines = sourceCode.split('\n');
   
   if (lines.length === 0) {
     return `// ${payload}\n`;
   }
   
-  // Choose a random position to insert the comment
-  const position = Math.floor(Math.random() * lines.length);
+  // Determine if we should use a random position (based on randomPlacement parameter)
+  // or a fixed position (start of the file)
+  const position = randomPlacement ? Math.floor(Math.random() * lines.length) : 0;
   
-  // Detect if we should use a single-line or multi-line comment based on the context
-  const useSingleLine = Math.random() > 0.5;
+  // Determine comment style based on position and source code context
+  // If at the start of the file, prefer a multi-line comment
+  // If elsewhere in the code, randomly choose between styles
+  const useSingleLine = position === 0 ? false : (Math.random() > 0.5);
   
   const commentedSecret = useSingleLine 
     ? `// ${payload}` 

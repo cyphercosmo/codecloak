@@ -24,7 +24,14 @@ export async function hideSecret(
     console.log(`Hiding "${secret}" with password "${password}", encryption: ${encrypt}`);
     
     // Use our comment-based implementation
-    const result = commentSteg.hide(sourceCode, secret, password, encrypt);
+    // Pass integrity flag as the last argument to control comment placement
+    const result = commentSteg.hide(
+      sourceCode, 
+      secret, 
+      password, 
+      encrypt, 
+      integrity // Using integrity flag to control random placement
+    );
     return result;
   } catch (error) {
     console.error("Error hiding secret:", error);
