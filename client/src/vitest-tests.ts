@@ -231,7 +231,8 @@ describe('Combined stegcloak approach', () => {
     const code = testCodeSamples[i % testCodeSamples.length]
     
     it(`should hide and reveal "${message.substring(0, 10)}${message.length > 10 ? '...' : ''}"`, async () => {
-      const encoded = await hideSecret(message, password, code)
+      // Fix parameter order: source code goes first, then secret, then password
+      const encoded = await hideSecret(code, message, password)
       expect(encoded).not.toBe(code)
       expect(encoded).toContain(code)
       
