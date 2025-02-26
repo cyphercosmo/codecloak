@@ -13,7 +13,7 @@ import { hideSecret, revealSecret } from "@/lib/stegcloak";
 export default function Home() {
   const { toast } = useToast();
   
-  const [sourceCode, setSourceCode] = useState<string>("// Enter your code here\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('Developer'));");
+  const [sourceCode, setSourceCode] = useState<string>("/**\n * A simple greeting function\n * @param {string} name - The name to greet\n */\nfunction greet(name) {\n  // Return a template string with the name\n  return `Hello, ${name}!`;\n}\n\n// Call the function with 'Developer'\nconsole.log(greet('Developer'));");
   const [secretMessage, setSecretMessage] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [revealPassword, setRevealPassword] = useState<string>("");
@@ -60,7 +60,7 @@ export default function Home() {
       setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
       toast({
         title: "Success",
-        description: "Secret message hidden successfully using zero-width characters",
+        description: "Secret message hidden successfully in code comments",
       });
     } catch (error) {
       toast({
@@ -131,7 +131,7 @@ export default function Home() {
         <div className="mb-8 text-center max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold mb-3 text-[#24292F]">Hide Secrets in Plain Code</h2>
           <p className="text-[#6E7681]">
-            CodeCloak embeds your secret messages into code snippets using invisible unicode characters, without affecting the code's functionality or appearance. Your secrets are hidden using zero-width unicode characters that are completely invisible.
+            CodeCloak embeds your secret messages as comments in code snippets, making them blend naturally with the source code. Your secrets are encrypted and encoded in Base64, appearing as regular comments while maintaining perfect security.
           </p>
         </div>
         

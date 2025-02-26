@@ -5,27 +5,27 @@ export default function InfoSection() {
       
       <div className="space-y-4 text-[#24292F]">
         <div>
-          <h4 className="font-medium mb-2">Invisible Steganography</h4>
-          <p>CodeCloak uses the StegCloak library to hide your secret messages within code using zero-width unicode characters that are completely invisible to the human eye.</p>
+          <h4 className="font-medium mb-2">Comment-Based Steganography</h4>
+          <p>CodeCloak hides your secret messages within code as normal comments that blend naturally with the source code. The comments contain Base64-encoded data that looks like regular developer notes.</p>
         </div>
         
         <div>
           <h4 className="font-medium mb-2">Security Features</h4>
           <ul className="list-disc pl-5 space-y-1">
-            <li>AES-256-CTR encryption to secure your hidden message</li>
-            <li>Optional HMAC integrity check to prevent tampering</li>
+            <li>XOR-based encryption to secure your hidden message</li>
+            <li>Base64 encoding for safe storage in comments</li>
             <li>Password protection for revealing the secret</li>
           </ul>
         </div>
         
         <div>
           <h4 className="font-medium mb-2">Perfect for Developers</h4>
-          <p>Hide confidential information, signatures, or watermarks in code snippets that you share publicly. The code works exactly the same, but contains your invisible secret.</p>
+          <p>Hide confidential information, signatures, or watermarks in code snippets that you share publicly. The code works exactly the same, and the hidden messages look like ordinary comments.</p>
         </div>
         
         <div className="text-sm text-[#6E7681] mt-8 pt-4 border-t border-[#F6F8FA]">
           <p>
-            Powered by <a href="https://github.com/KuroLabs/stegcloak" target="_blank" rel="noopener noreferrer" className="text-[#2EA44F] hover:underline">StegCloak</a> - Hide secrets with invisible characters in plain text securely using passwords.
+            CodeCloak - A secure way to hide messages in code comments with encryption and Base64 encoding.
           </p>
         </div>
       </div>

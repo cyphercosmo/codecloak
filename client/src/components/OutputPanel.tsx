@@ -68,8 +68,8 @@ export default function OutputPanel({
               <div className="flex items-start">
                 <FaInfoCircle className="text-[#2EA44F] mt-1 mr-2" />
                 <div>
-                  <p>Secret successfully hidden in the code.</p>
-                  <p className="mt-1 text-[#6E7681]">The code below contains your hidden message but looks and works exactly like the original.</p>
+                  <p>Secret successfully hidden in the code as a comment.</p>
+                  <p className="mt-1 text-[#6E7681]">The code below contains your hidden message as an encoded comment that blends naturally with the source code.</p>
                 </div>
               </div>
             </div>
