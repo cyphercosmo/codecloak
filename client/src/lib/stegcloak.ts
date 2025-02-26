@@ -11,8 +11,8 @@ async function getStegCloak() {
   
   try {
     // Dynamic import with error handling
-    const StegCloakModule = await import('stegcloak');
-    StegCloakInstance = StegCloakModule.default;
+    const module = await import('stegcloak');
+    StegCloakInstance = module.default;
     return StegCloakInstance;
   } catch (error) {
     console.error("Error loading StegCloak:", error);
@@ -46,17 +46,12 @@ export async function hideSecret(
     // Hide the secret message in the code
     // StegCloak uses zero-width characters which are invisible to the human eye
     console.log(`Hiding "${secret}" with password "${password}", encryption: ${encrypt}, integrity: ${integrity}`);
+    
+    // The method adds invisible Unicode characters
     return stegcloak.hide(secret, password, sourceCode);
   } catch (error) {
     console.error("Error hiding secret:", error);
-    
-    // Fallback to a simpler implementation for demo purposes if StegCloak fails
-    if (process.env.NODE_ENV === 'development') {
-      // This is only used when the actual StegCloak library fails
-      return sourceCode + `\n/* ${encrypt ? '🔒' : ''}${integrity ? '✓' : ''} Secret: ${btoa(secret)} */`;
-    }
-    
-    throw new Error("Failed to hide secret in code");
+    throw new Error("Failed to hide secret in code. StegCloak could not be initialized properly.");
   }
 }
 
@@ -82,20 +77,6 @@ export async function revealSecret(
     return stegcloak.reveal(encodedText, password);
   } catch (error) {
     console.error("Error revealing secret:", error);
-    
-    // Fallback to a simpler implementation for demo purposes if StegCloak fails
-    if (process.env.NODE_ENV === 'development') {
-      // Check if this is our fallback format
-      const match = encodedText.match(/\/\* (?:🔒)?(?:✓)? Secret: (.*?) \*\//);
-      if (match && match[1]) {
-        try {
-          return atob(match[1]);
-        } catch (e) {
-          throw new Error("Failed to reveal secret. The encoded text might be corrupted.");
-        }
-      }
-    }
-    
-    throw new Error("Failed to reveal secret. Check if the password is correct.");
+    throw new Error("Failed to reveal secret. Check if the password is correct and that the text contains a hidden message.");
   }
 }
