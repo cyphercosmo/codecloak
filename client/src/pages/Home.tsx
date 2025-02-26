@@ -167,6 +167,7 @@ export default function Home() {
             revealedSecret={revealedSecret}
             revealSuccess={revealSuccess}
             setEncodedOutput={setEncodedOutput}
+            onClear={handleClear}
           />
         </div>
         

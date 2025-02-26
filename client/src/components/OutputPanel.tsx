@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FaCopy, FaEye, FaInfoCircle, FaPaste, FaEdit, FaCheck } from "react-icons/fa";
+import { FaCopy, FaEye, FaInfoCircle, FaPaste, FaEdit, FaCheck, FaRedo } from "react-icons/fa";
 import CodeEditor from "@/components/CodeEditor";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mightContainHiddenMessage } from '@/lib/codeSteg';
+import { mightContainHiddenMessage, detectLanguage } from '@/lib/codeSteg';
 
 interface OutputPanelProps {
   encodedOutput: string;
@@ -17,6 +17,7 @@ interface OutputPanelProps {
   revealedSecret: string;
   revealSuccess: boolean;
   setEncodedOutput: (code: string) => void;
+  onClear?: () => void;
 }
 
 export default function OutputPanel({
@@ -27,7 +28,8 @@ export default function OutputPanel({
   onReveal,
   revealedSecret,
   revealSuccess,
-  setEncodedOutput
+  setEncodedOutput,
+  onClear
 }: OutputPanelProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -145,6 +147,17 @@ export default function OutputPanel({
           >
             <FaCopy className="mr-1" /> Copy
           </Button>
+          {onClear && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-[#6E7681] bg-opacity-30 hover:bg-opacity-50 border-none text-white"
+              onClick={onClear}
+              title="Clear output and start over"
+            >
+              <FaRedo className="mr-1" /> Reset
+            </Button>
+          )}
         </div>
       </div>
       
