@@ -53,25 +53,39 @@ export async function revealSecret(
   try {
     console.log(`Revealing secret with password "${password}"`);
     
-    // Check if the encoded text contains our code-based marker
-    if (USE_CODE_STEG && codeSteg.mightContainHiddenMessage(encodedText)) {
-      return codeSteg.revealFromCode(encodedText, password);
-    } else {
-      // Try the zero-width character implementation as fallback
-      return browserStegCloak.reveal(encodedText, password);
-    }
-  } catch (error) {
-    // If code-based method fails, try zero-width implementation
-    if (USE_CODE_STEG) {
+    // First determine if code-based steganography was likely used
+    const mightHaveHiddenMessage = USE_CODE_STEG && codeSteg.mightContainHiddenMessage(encodedText);
+    console.log(`Might contain hidden message: ${mightHaveHiddenMessage}`);
+    
+    if (mightHaveHiddenMessage) {
+      // Try code-based approach first
       try {
-        return browserStegCloak.reveal(encodedText, password);
-      } catch (innerError) {
-        console.error("Error revealing secret:", error);
-        throw new Error("Failed to reveal secret. Check if the password is correct and that the text contains a hidden message.");
+        const result = codeSteg.revealFromCode(encodedText, password);
+        if (result && result.trim() !== '') {
+          return result;
+        }
+      } catch (codeStegError) {
+        console.log("Code steg approach failed, will try fallback:", codeStegError);
+        // Continue to fallback if this fails
       }
     }
     
+    // Fallback to zero-width character approach
+    try {
+      const result = browserStegCloak.reveal(encodedText, password);
+      if (result && result.trim() !== '') {
+        return result;
+      }
+    } catch (fallbackError) {
+      console.log("Fallback approach failed:", fallbackError);
+      // If fallback also fails, rethrow the original error
+      throw new Error("No hidden message found or the password is incorrect.");
+    }
+    
+    // If we get here with no results, no message was found
+    throw new Error("No hidden message found in the provided code.");
+  } catch (error) {
     console.error("Error revealing secret:", error);
-    throw new Error("Failed to reveal secret. Check if the password is correct and that the text contains a hidden message.");
+    throw new Error(error instanceof Error ? error.message : "Failed to reveal secret. Check if the password is correct and that the text contains a hidden message.");
   }
 }

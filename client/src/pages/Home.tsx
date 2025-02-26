@@ -81,7 +81,7 @@ export default function Home() {
       return;
     }
     
-    if (isEncryptionEnabled && !revealPassword) {
+    if (!revealPassword) {
       toast({
         title: "Error",
         description: "Password is required to reveal the secret",
@@ -91,8 +91,18 @@ export default function Home() {
     }
     
     try {
+      // First, check if the text might contain a hidden message
+      if (!encodedOutput.trim()) {
+        throw new Error("No code provided to check for hidden messages");
+      }
+      
       // Use the imported revealSecret function
       const revealed = await revealSecret(encodedOutput, revealPassword);
+      
+      if (!revealed || revealed.trim() === '') {
+        throw new Error("No hidden message found or password is incorrect");
+      }
+      
       setRevealedSecret(revealed);
       setRevealSuccess(true);
       toast({
@@ -106,6 +116,7 @@ export default function Home() {
         variant: "destructive",
       });
       setRevealSuccess(false);
+      setRevealedSecret("");
     }
   };
   

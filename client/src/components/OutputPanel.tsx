@@ -35,11 +35,36 @@ export default function OutputPanel({
   const [isEditing, setIsEditing] = useState(false);
   const [tempEncodedOutput, setTempEncodedOutput] = useState(encodedOutput);
   const [activeTab, setActiveTab] = useState<string>("encoded");
+  const [detectedLanguage, setDetectedLanguage] = useState<string>("");
   
   // Update tempEncodedOutput when encodedOutput changes
   useEffect(() => {
     setTempEncodedOutput(encodedOutput);
+    
+    // Detect language whenever output changes
+    if (encodedOutput && encodedOutput.trim()) {
+      try {
+        const lang = detectLanguage(encodedOutput);
+        setDetectedLanguage(lang);
+      } catch (err) {
+        setDetectedLanguage("");
+      }
+    } else {
+      setDetectedLanguage("");
+    }
   }, [encodedOutput]);
+
+  // Update activeTab when relevant state changes
+  useEffect(() => {
+    // Switch to encoded tab when a new secret is successfully hidden
+    if (encodeSuccess) {
+      setActiveTab("encoded");
+    }
+    // Switch to reveal tab when a secret is successfully revealed
+    if (revealSuccess) {
+      setActiveTab("reveal");
+    }
+  }, [encodeSuccess, revealSuccess]);
   
   // Check if code might contain hidden messages
   const mightContainSecret = (code: string): boolean => {
@@ -212,12 +237,19 @@ export default function OutputPanel({
                   />
                 </div>
                 
-                <Button 
-                  className="w-full bg-[#6E7681] hover:bg-opacity-80 text-white font-medium"
-                  onClick={onReveal}
-                >
-                  <FaEye className="mr-2" /> Reveal Secret
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    className="w-full bg-[#6E7681] hover:bg-opacity-80 text-white font-medium"
+                    onClick={onReveal}
+                  >
+                    <FaEye className="mr-2" /> Reveal Secret
+                  </Button>
+                  
+                  {/* Display a notice that encourages proper use */}
+                  <p className="text-xs text-[#6E7681] text-center">
+                    Make sure the password matches the one used to hide the secret
+                  </p>
+                </div>
                 
                 {revealSuccess && (
                   <div className="mt-4 p-3 bg-[#F0F3F6] bg-opacity-10 rounded-md">
