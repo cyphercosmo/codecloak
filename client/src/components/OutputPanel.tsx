@@ -6,6 +6,7 @@ import { FaCopy, FaEye, FaInfoCircle, FaPaste, FaEdit, FaCheck } from "react-ico
 import CodeEditor from "@/components/CodeEditor";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mightContainHiddenMessage } from '@/lib/codeSteg';
 
 interface OutputPanelProps {
   encodedOutput: string;
@@ -40,8 +41,8 @@ export default function OutputPanel({
   
   // Check if code might contain hidden messages
   const mightContainSecret = (code: string): boolean => {
-    // Look for zero-width characters that indicate hidden content
-    return code.includes('\u200B') || code.includes('\u200C') || code.includes('\u200D');
+    // Use the imported function to check for hidden messages
+    return mightContainHiddenMessage(code);
   };
   
   const handleCopy = async () => {

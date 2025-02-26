@@ -60,7 +60,7 @@ export default function Home() {
       setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
       toast({
         title: "Success",
-        description: "Secret message hidden successfully using zero-width characters",
+        description: "Secret message hidden successfully in code comments",
       });
     } catch (error) {
       toast({
@@ -131,11 +131,11 @@ export default function Home() {
         <div className="mb-8 text-center max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold mb-3 text-[#24292F]">Hide Secrets in Plain Code</h2>
           <p className="text-[#6E7681]">
-            CodeCloak embeds your secret messages into code snippets using invisible unicode characters, without affecting the code's functionality or appearance. Your secrets are hidden within comments using zero-width unicode characters that are invisible in most contexts.
+            CodeCloak embeds your secret messages into code snippets by disguising them as legitimate code comments. It transforms your secrets into what appears to be standard code documentation, version numbers, or developer notes, without affecting the code's functionality.
           </p>
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
             <p>
-              <strong>Note:</strong> Some code editors and IDEs may display or highlight zero-width characters. For best results, share code in contexts where these characters remain invisible (documentation, chat apps, code review tools, etc).
+              <strong>Note:</strong> Your secrets are hidden within comments that look like normal parts of the code. For best results, use code that already contains comments, or we'll add believable comments to contain your hidden message.
             </p>
           </div>
         </div>
@@ -185,10 +185,10 @@ export default function Home() {
             <h4 className="font-semibold mb-2">Best Practices:</h4>
             <ul className="list-disc pl-5 space-y-1 text-sm">
               <li>Always use a strong password to secure your hidden messages</li>
-              <li>Use code that has comments for better hiding places</li>
+              <li>Use code that already has comments for more natural-looking results</li>
               <li>Test the revealed message works before sharing important information</li>
-              <li>Be aware that some IDEs may detect or highlight invisible characters</li>
-              <li>Share code in contexts where zero-width characters are less likely to be detected</li>
+              <li>The application automatically embeds your secret in legitimate-looking comments</li>
+              <li>Secrets are hidden in a way that will not affect the code's execution or syntax</li>
             </ul>
           </div>
         </div>
