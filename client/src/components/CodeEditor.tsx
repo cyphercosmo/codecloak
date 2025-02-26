@@ -53,13 +53,12 @@ export default function CodeEditor({
       spellCheck={false}
       style={{ 
         fontFamily: "Monaco, SF Mono, Fira Code, monospace",
-        minHeight: "200px",
         height: "100%",
         backgroundColor: "#2D2D2D", 
         color: "white",
         outline: "none",
         overflowY: "auto",
-        maxHeight: "400px" // Add max-height to enable scrolling
+        display: "block" // Ensure proper display
       }}
     />
   );

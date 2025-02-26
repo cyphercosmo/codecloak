@@ -61,8 +61,8 @@ export default function OutputPanel({
         </div>
       </div>
       
-      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col overflow-auto">
-        <div className="border border-[#6E7681] border-opacity-30 rounded-md mb-4 flex-1">
+      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col overflow-auto gap-4">
+        <div className="border border-[#6E7681] border-opacity-30 rounded-md h-[300px] min-h-[300px] flex flex-col">
           {encodeSuccess && (
             <div className="bg-[#F0F3F6] bg-opacity-10 p-3 text-white text-sm">
               <div className="flex items-start">
@@ -75,15 +75,17 @@ export default function OutputPanel({
             </div>
           )}
           
-          <CodeEditor
-            value={encodedOutput || "// Your encoded result will appear here"}
-            onChange={() => {}}
-            readOnly={true}
-            className="bg-[#2D2D2D] text-white p-3 font-mono text-sm"
-          />
+          <div className="flex-1 overflow-auto">
+            <CodeEditor
+              value={encodedOutput || "// Your encoded result will appear here"}
+              onChange={() => {}}
+              readOnly={true}
+              className="bg-[#2D2D2D] text-white p-3 font-mono text-sm h-full"
+            />
+          </div>
         </div>
         
-        <div className="border border-[#6E7681] border-opacity-30 rounded-md p-4">
+        <div className="border border-[#6E7681] border-opacity-30 rounded-md p-4 mt-auto">
           <h4 className="text-white text-sm font-medium mb-3">Reveal Secret</h4>
           <div className="space-y-4">
             <div>

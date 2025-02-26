@@ -70,13 +70,15 @@ export default function InputPanel({
         </div>
       </div>
       
-      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col overflow-auto">
-        <div className="border border-[#6E7681] border-opacity-30 rounded-md mb-4 flex-1">
-          <CodeEditor
-            value={sourceCode}
-            onChange={setSourceCode}
-            className="bg-[#2D2D2D] text-white p-3 font-mono text-sm"
-          />
+      <div className="p-4 bg-[#2D2D2D] flex-1 flex flex-col overflow-auto gap-4">
+        <div className="border border-[#6E7681] border-opacity-30 rounded-md h-[300px] min-h-[300px] flex flex-col">
+          <div className="flex-1 overflow-auto">
+            <CodeEditor
+              value={sourceCode}
+              onChange={setSourceCode}
+              className="bg-[#2D2D2D] text-white p-3 font-mono text-sm h-full"
+            />
+          </div>
         </div>
         
         <div className="space-y-4">
