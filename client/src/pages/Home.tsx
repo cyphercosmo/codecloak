@@ -5,6 +5,8 @@ import OutputPanel from "@/components/OutputPanel";
 import InfoSection from "@/components/InfoSection";
 import Footer from "@/components/Footer";
 import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FaInfoCircle } from "react-icons/fa";
 
 export default function Home() {
   const { toast } = useToast();
@@ -55,6 +57,7 @@ export default function Home() {
         const result = hideSecret(sourceCode, secretMessage, password, isEncryptionEnabled, isIntegrityEnabled);
         setEncodedOutput(result);
         setEncodeSuccess(true);
+        setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
         toast({
           title: "Success",
           description: "Secret message hidden successfully",
@@ -135,6 +138,16 @@ export default function Home() {
           </p>
         </div>
         
+        <Alert className="mb-6 bg-[#F0F3F6] text-[#24292F] border-[#2EA44F]">
+          <FaInfoCircle className="h-4 w-4 text-[#2EA44F]" />
+          <AlertTitle>Demo Mode</AlertTitle>
+          <AlertDescription>
+            This is a demo implementation. In a real application, this would use the StegCloak library to hide messages 
+            with zero-width unicode characters that are completely invisible. For this demo, we're simulating the 
+            functionality by adding comments to the code.
+          </AlertDescription>
+        </Alert>
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <InputPanel 
             sourceCode={sourceCode}
@@ -160,6 +173,18 @@ export default function Home() {
             revealedSecret={revealedSecret}
             revealSuccess={revealSuccess}
           />
+        </div>
+        
+        <div className="mb-8 bg-white rounded-lg shadow-md p-4 text-[#24292F]">
+          <h3 className="font-semibold mb-2">How to use:</h3>
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>Enter or paste your code in the editor</li>
+            <li>Type your secret message</li>
+            <li>Enter a password if you want encryption (recommended)</li>
+            <li>Click "Hide Secret in Code" button</li>
+            <li>Copy the resulting code to share it</li>
+            <li>To reveal a secret, paste encoded code, enter the password, and click "Reveal Secret"</li>
+          </ol>
         </div>
         
         <InfoSection />
