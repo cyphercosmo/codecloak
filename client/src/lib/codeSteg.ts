@@ -270,7 +270,7 @@ function findComments(code: string): { type: string, start: number, end: number,
 /**
  * Detect the language of the source code
  */
-function detectLanguage(sourceCode: string): string {
+export function detectLanguage(sourceCode: string): string {
   // Simplified language detection based on file patterns and keywords
   const normalizedCode = sourceCode.toLowerCase();
   

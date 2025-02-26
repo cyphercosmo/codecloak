@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaMagic, FaCode, FaTrashAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Badge } from "@/components/ui/badge";
 import CodeEditor from "@/components/CodeEditor";
-import { loadSample } from "@/lib/samples";
+import { loadSample, additionalSamples } from "@/lib/samples";
+import { detectLanguage } from "@/lib/codeSteg";
 
 interface InputPanelProps {
   sourceCode: string;
@@ -37,6 +39,33 @@ export default function InputPanel({
   onClear
 }: InputPanelProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [detectedLanguage, setDetectedLanguage] = useState('javascript');
+  const [showSamplesDropdown, setShowSamplesDropdown] = useState(false);
+  
+  // Reference for the samples dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Detect the language whenever the source code changes
+  useEffect(() => {
+    if (sourceCode) {
+      const language = detectLanguage(sourceCode);
+      setDetectedLanguage(language);
+    }
+  }, [sourceCode]);
+  
+  // Add click outside handler for the samples dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowSamplesDropdown(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
@@ -46,19 +75,51 @@ export default function InputPanel({
     setSourceCode(loadSample());
   };
   
+  const handleLoadAdditionalSample = (sample: any) => {
+    setSourceCode(sample.code);
+    setShowSamplesDropdown(false);
+  };
+  
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="bg-[#2D2D2D] text-white px-4 py-3 flex justify-between items-center">
-        <h3 className="font-medium">Input</h3>
+        <div className="flex items-center space-x-3">
+          <h3 className="font-medium">Input</h3>
+          {detectedLanguage && (
+            <Badge variant="outline" className="text-xs bg-[#6E7681] bg-opacity-20 border-none text-[#E6E6E6]">
+              {detectedLanguage.charAt(0).toUpperCase() + detectedLanguage.slice(1)}
+            </Badge>
+          )}
+        </div>
         <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="bg-[#6E7681] bg-opacity-30 hover:bg-opacity-50 border-none text-white"
-            onClick={handleLoadSample}
-          >
-            <FaCode className="mr-1" /> Load Sample
-          </Button>
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-[#6E7681] bg-opacity-30 hover:bg-opacity-50 border-none text-white"
+              onClick={() => setShowSamplesDropdown(!showSamplesDropdown)}
+            >
+              <FaCode className="mr-1" /> Samples
+            </Button>
+            {showSamplesDropdown && (
+              <div 
+                ref={dropdownRef}
+                className="absolute z-10 right-0 mt-1 w-56 bg-[#1E1E1E] rounded-md shadow-lg overflow-hidden"
+              >
+                <div className="py-1 max-h-48 overflow-y-auto">
+                  {additionalSamples.map((sample, index) => (
+                    <button
+                      key={index}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#2D2D2D]"
+                      onClick={() => handleLoadAdditionalSample(sample)}
+                    >
+                      {sample.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <Button 
             variant="outline" 
             size="sm" 
