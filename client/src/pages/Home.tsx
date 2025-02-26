@@ -59,7 +59,7 @@ export default function Home() {
       setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
       toast({
         title: "Success",
-        description: "Secret message hidden successfully using zero-width characters",
+        description: "Secret message hidden using invisible zero-width characters",
       });
     } catch (error) {
       toast({
