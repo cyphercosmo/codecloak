@@ -75,5 +75,75 @@ function calculateTotal(items) {
 
 # Example usage of the function
 print(fibonacci(100))`
+  },
+  {
+    name: "C++ Example",
+    code: `#include <iostream>
+#include <vector>
+
+/**
+ * Sorts an array of integers using quicksort algorithm
+ * @param arr The array to sort
+ * @param left Starting index
+ * @param right Ending index 
+ */
+void quickSort(std::vector<int>& arr, int left, int right) {
+    int i = left, j = right;
+    int pivot = arr[(left + right) / 2];
+
+    /* Partition the array */
+    while (i <= j) {
+        // Find element on left that should be on right
+        while (arr[i] < pivot)
+            i++;
+        
+        // Find element on right that should be on left
+        while (arr[j] > pivot)
+            j--;
+        
+        // Swap elements and move indices
+        if (i <= j) {
+            std::swap(arr[i], arr[j]);
+            i++;
+            j--;
+        }
+    }
+    
+    // Recursive calls
+    if (left < j)
+        quickSort(arr, left, j);
+    if (i < right)
+        quickSort(arr, i, right);
+}`
+  },
+  {
+    name: "SQL Query",
+    code: `-- Query to find top customers by order value
+-- Created: 2023-03-15
+-- Author: Database Team
+
+SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    /* Calculate the total amount spent */
+    SUM(o.total_amount) AS total_spent
+FROM 
+    customers c
+    /* Join with orders table */
+    INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE 
+    -- Only include orders from last year
+    o.order_date BETWEEN '2022-01-01' AND '2022-12-31'
+    -- Only include completed orders
+    AND o.status = 'completed'
+GROUP BY 
+    c.customer_id,
+    c.first_name,
+    c.last_name
+-- Sort by highest spenders first
+ORDER BY 
+    total_spent DESC
+LIMIT 10; -- Show only top 10`
   }
 ];

@@ -15,6 +15,7 @@ export default function InfoSection() {
             <li>XOR-based encryption to secure your hidden message</li>
             <li>Base64 encoding for safe storage in comments</li>
             <li>Password protection for revealing the secret</li>
+            <li>Random comment placement to make detection more difficult</li>
           </ul>
         </div>
         

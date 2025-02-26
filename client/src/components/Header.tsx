@@ -7,11 +7,11 @@ export default function Header() {
         <div className="flex items-center mb-4 sm:mb-0">
           <FaUserSecret className="text-2xl mr-3" />
           <h1 className="text-xl font-bold">CodeCloak</h1>
-          <span className="ml-2 opacity-75 text-sm">powered by StegCloak</span>
+          <span className="ml-2 opacity-75 text-sm">Comment-based Steganography</span>
         </div>
         <div className="flex space-x-4">
           <a 
-            href="https://github.com/KuroLabs/stegcloak" 
+            href="https://github.com/CodeCloakProject/code-steg" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-white hover:text-[#2EA44F] transition-colors duration-200"

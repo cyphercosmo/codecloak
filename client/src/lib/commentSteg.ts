@@ -133,9 +133,22 @@ export function reveal(
         continue; // Skip if not valid base64
       }
       
-      const decoded = decryptMessage(payload, password);
+      let decoded;
+      try {
+        // First try to decrypt using the password in case the message was encrypted
+        decoded = decryptMessage(payload, password);
+      } catch (error) {
+        // If decryption fails, the message may not be encrypted
+        // Try to decode as Base64 directly
+        try {
+          decoded = Buffer.from(payload, 'base64').toString('utf-8');
+        } catch (decodeError) {
+          // If both methods fail, this comment doesn't contain a valid message
+          continue;
+        }
+      }
       
-      // If we can successfully decrypt, assume this is our hidden message
+      // If we got here, we successfully decoded/decrypted something
       return decoded;
     } catch (error) {
       // If decryption fails, try the next comment
