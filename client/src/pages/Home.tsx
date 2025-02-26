@@ -131,8 +131,13 @@ export default function Home() {
         <div className="mb-8 text-center max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold mb-3 text-[#24292F]">Hide Secrets in Plain Code</h2>
           <p className="text-[#6E7681]">
-            CodeCloak embeds your secret messages into code snippets using invisible unicode characters, without affecting the code's functionality or appearance. Your secrets are hidden using zero-width unicode characters that are completely invisible.
+            CodeCloak embeds your secret messages into code snippets using invisible unicode characters, without affecting the code's functionality or appearance. Your secrets are hidden within comments using zero-width unicode characters that are invisible in most contexts.
           </p>
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
+            <p>
+              <strong>Note:</strong> Some code editors and IDEs may display or highlight zero-width characters. For best results, share code in contexts where these characters remain invisible (documentation, chat apps, code review tools, etc).
+            </p>
+          </div>
         </div>
         
 
@@ -167,13 +172,24 @@ export default function Home() {
         <div className="mb-8 bg-white rounded-lg shadow-md p-4 text-[#24292F]">
           <h3 className="font-semibold mb-2">How to use:</h3>
           <ol className="list-decimal pl-5 space-y-1">
-            <li>Enter or paste your code in the editor</li>
+            <li>Enter or paste your code in the editor (make sure it includes comments)</li>
             <li>Type your secret message</li>
-            <li>Enter a password if you want encryption (recommended)</li>
+            <li>Enter a password if you want encryption (strongly recommended)</li>
             <li>Click "Hide Secret in Code" button</li>
-            <li>Copy the resulting code to share it</li>
+            <li>Copy the resulting code to share it via chat apps, forums, or documentation</li>
             <li>To reveal a secret, paste encoded code, enter the password, and click "Reveal Secret"</li>
           </ol>
+          
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <h4 className="font-semibold mb-2">Best Practices:</h4>
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              <li>Always use a strong password to secure your hidden messages</li>
+              <li>Use code that has comments for better hiding places</li>
+              <li>Test the revealed message works before sharing important information</li>
+              <li>Be aware that some IDEs may detect or highlight invisible characters</li>
+              <li>Share code in contexts where zero-width characters are less likely to be detected</li>
+            </ul>
+          </div>
         </div>
         
         <InfoSection />

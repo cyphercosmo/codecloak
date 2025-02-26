@@ -7,6 +7,8 @@
 const ZWSP = '\u200B'; // Zero-width space
 const ZWNJ = '\u200C'; // Zero-width non-joiner
 const ZWJ = '\u200D';  // Zero-width joiner
+const MARKER_START = ZWJ + ZWSP + ZWJ; // Marker for start of hidden content
+const MARKER_END = ZWJ + ZWNJ + ZWJ; // Marker for end of hidden content
 
 /**
  * Simple function to convert a string to binary
@@ -58,19 +60,32 @@ function zeroWidthToBinary(zeroWidth: string): string {
 }
 
 /**
- * Extract zero-width characters from text
+ * Extract zero-width characters from text that are between our markers
  * @param text Text that may contain zero-width characters
- * @returns String containing only zero-width characters
+ * @returns String containing only zero-width characters between markers
  */
 function extractZeroWidth(text: string): string {
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (char === ZWSP || char === ZWNJ || char === ZWJ) {
-      result += char;
+  // Look for marker start and end
+  const startIndex = text.indexOf(MARKER_START);
+  if (startIndex === -1) {
+    // Try the old method if no markers found - backward compatibility
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === ZWSP || char === ZWNJ) {
+        result += char;
+      }
     }
+    return result;
   }
-  return result;
+  
+  const endIndex = text.indexOf(MARKER_END, startIndex + MARKER_START.length);
+  if (endIndex === -1) {
+    throw new Error('Corrupted message: start marker found but no end marker');
+  }
+  
+  // Extract only the content between markers
+  return text.substring(startIndex + MARKER_START.length, endIndex);
 }
 
 /**
@@ -146,32 +161,63 @@ export function hide(
   
   // Convert the message to binary and then to zero-width chars
   const messageBinary = textToBinary(message);
-  const zeroWidthMessage = binaryToZeroWidth(messageBinary);
+  const zeroWidthMessage = MARKER_START + binaryToZeroWidth(messageBinary) + MARKER_END;
   
   // Find a comment line to embed the secret into
   const lines = cover.split('\n');
   
-  // Look for a single-line comment to insert the zero-width characters
+  // First try to find a multi-line comment which is safer
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Look for /* style comments first - safer place to hide
+    const commentIndex = line.indexOf('/*');
+    const endCommentIndex = line.indexOf('*/');
+    
+    // Only use comments that start and end on the same line
+    if (commentIndex !== -1 && endCommentIndex !== -1 && commentIndex < endCommentIndex) {
+      // Insert the zero-width characters inside the comment
+      const insertionPoint = commentIndex + 2;
+      lines[i] = line.substring(0, insertionPoint) + 
+                zeroWidthMessage + 
+                line.substring(insertionPoint);
+      return lines.join('\n');
+    }
+  }
+  
+  // Then try to find a single-line comment
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const commentIndex = line.indexOf('//');
     
     if (commentIndex !== -1) {
       // Insert the zero-width characters right after the //
-      lines[i] = line.substring(0, commentIndex + 2) + zeroWidthMessage + line.substring(commentIndex + 2);
+      const insertionPoint = commentIndex + 2;
+      lines[i] = line.substring(0, insertionPoint) + 
+                zeroWidthMessage + 
+                line.substring(insertionPoint);
       return lines.join('\n');
     }
   }
   
-  // If no comment found, try to find an appropriate place - after the first line
+  // If no suitable comment found, add one at the top of the file
   if (lines.length > 0) {
-    // Add comment with hidden message to the second line
-    lines.splice(1, 0, '// ' + zeroWidthMessage);
+    // Try to find a good place for a comment, preferably after any headers
+    // like shebang lines or use strict
+    let insertionLine = 0;
+    
+    // Skip shebang or 'use strict' if present
+    if (lines[0].startsWith('#!') || lines[0].includes('use strict')) {
+      insertionLine = 1;
+    }
+    
+    // Add a new comment with our hidden message
+    lines.splice(insertionLine, 0, '/* ' + zeroWidthMessage + ' */');
     return lines.join('\n');
   }
   
-  // If all else fails, just append it to the code (not ideal)
-  return cover + '\n// ' + zeroWidthMessage;
+  // If all else fails, just add a comment at the end
+  return cover + '\n/* ' + zeroWidthMessage + ' */';
 }
 
 /**
