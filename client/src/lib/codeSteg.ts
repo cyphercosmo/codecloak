@@ -613,6 +613,18 @@ export function revealFromCode(
   const language = detectLanguage(encodedCode);
   console.log(`Detected language for revealing: ${language}`);
   
+  /**
+   * Process and clean a decoded message
+   */
+  function processMessage(rawMessage: string): string {
+    // Check for the STEG prefix and remove it
+    if (rawMessage.startsWith('STEG:')) {
+      console.log("Found STEG prefix, extracting actual message");
+      return rawMessage.substring(5);
+    }
+    return rawMessage;
+  }
+  
   // For HTML, check for our special HTML tags first
   if (language === 'html') {
     // Check meta tags
@@ -628,10 +640,13 @@ export function revealFromCode(
           message = decryptMessage(message, password);
         }
         
+        message = processMessage(message);
+        
         if (message.length > 0 && /^[\x20-\x7E]+$/.test(message)) {
           return message;
         }
       } catch (e) {
+        console.log("Error processing HTML meta tag:", e);
         // If this approach fails, continue to regular comment checking
       }
     }
@@ -649,10 +664,13 @@ export function revealFromCode(
           message = decryptMessage(message, password);
         }
         
+        message = processMessage(message);
+        
         if (message.length > 0 && /^[\x20-\x7E]+$/.test(message)) {
           return message;
         }
       } catch (e) {
+        console.log("Error processing HTML JSON-LD:", e);
         // If this approach fails, continue to regular comment checking
       }
     }
@@ -677,17 +695,32 @@ export function revealFromCode(
         
         // Convert binary back to text
         let message = binaryToText(binaryMessage.substring(0, Math.floor(binaryMessage.length / 8) * 8));
+        console.log(`Raw decoded message from code steg: ${message.slice(0, 20)}${message.length > 20 ? '...' : ''}`);
         
         // Decrypt if password provided
         if (password) {
           message = decryptMessage(message, password);
+          console.log(`Decrypted message from code steg: ${message.slice(0, 20)}${message.length > 20 ? '...' : ''}`);
         }
         
+        message = processMessage(message);
+        
         // Check if the message makes sense (has printable characters)
-        if (message.length > 0 && /^[\x20-\x7E]+$/.test(message)) {
-          return message;
+        if (message.length > 0) {
+          // Looser validation to allow more characters
+          if (/^[\x20-\x7E\u0080-\uFFFF]+$/.test(message)) {
+            return message;
+          } else {
+            console.log("Message contains invalid characters, might be corrupted");
+            // Try to extract only the valid part
+            const validChars = message.match(/[\x20-\x7E\u0080-\uFFFF]+/g) || [];
+            if (validChars.length > 0) {
+              return validChars.join('');
+            }
+          }
         }
       } catch (e) {
+        console.log("Error processing comment:", e);
         // If decoding fails, continue to the next comment
         continue;
       }
