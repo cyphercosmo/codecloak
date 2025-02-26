@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { runTests } from './test-stegcloak';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function TestRunner() {
   const [results, setResults] = useState<string[]>([]);

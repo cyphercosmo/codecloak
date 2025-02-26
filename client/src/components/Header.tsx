@@ -1,4 +1,4 @@
-import { FaUserSecret, FaGithub, FaInfoCircle } from "react-icons/fa";
+import { FaUserSecret, FaGithub, FaInfoCircle, FaVial } from "react-icons/fa";
 
 export default function Header() {
   return (
@@ -25,6 +25,13 @@ export default function Header() {
           >
             <FaInfoCircle className="inline mr-1" />
             <span>How it works</span>
+          </a>
+          <a 
+            href="/test" 
+            className="text-white hover:text-[#2EA44F] transition-colors duration-200"
+          >
+            <FaVial className="inline mr-1" />
+            <span>Test Suite</span>
           </a>
         </div>
       </div>
