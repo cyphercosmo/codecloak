@@ -166,6 +166,7 @@ export default function Home() {
             onReveal={handleReveal}
             revealedSecret={revealedSecret}
             revealSuccess={revealSuccess}
+            setEncodedOutput={setEncodedOutput}
           />
         </div>
         
@@ -177,7 +178,7 @@ export default function Home() {
             <li>Enter a password if you want encryption (strongly recommended)</li>
             <li>Click "Hide Secret in Code" button</li>
             <li>Copy the resulting code to share it via chat apps, forums, or documentation</li>
-            <li>To reveal a secret, paste encoded code, enter the password, and click "Reveal Secret"</li>
+            <li>To reveal a secret from code, either click the "Paste" button in the Output panel or use the "Edit" button to manually input code, enter the password, and click "Reveal Secret"</li>
           </ol>
           
           <div className="mt-4 pt-3 border-t border-gray-200">
