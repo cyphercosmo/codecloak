@@ -2,8 +2,8 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import InputPanel from "@/components/InputPanel";
 import OutputPanel from "@/components/OutputPanel";
-import InfoSection from "@/components/InfoSection";
 import Footer from "@/components/Footer";
+import { Link } from "wouter";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaInfoCircle } from "react-icons/fa";
@@ -162,7 +162,11 @@ export default function Home() {
           />
         </div>
         
-        <InfoSection />
+        <div className="text-center mb-8">
+          <Link href="/how-it-works" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded transition-colors">
+            Learn how CodeCloak works
+          </Link>
+        </div>
       </main>
       <Footer />
     </div>
