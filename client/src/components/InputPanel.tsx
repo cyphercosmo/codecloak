@@ -3,9 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FaMagic, FaCode, FaTrashAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { 
+  FaMagic, 
+  FaCode, 
+  FaTrashAlt, 
+  FaEye, 
+  FaEyeSlash, 
+  FaLanguage 
+} from "react-icons/fa";
 import CodeEditor from "@/components/CodeEditor";
 import { loadSample } from "@/lib/samples";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SupportedLanguage } from "@/lib/languageSteg";
 
 interface InputPanelProps {
   sourceCode: string;
@@ -18,6 +33,8 @@ interface InputPanelProps {
   setIsEncryptionEnabled: (enabled: boolean) => void;
   isIntegrityEnabled: boolean;
   setIsIntegrityEnabled: (enabled: boolean) => void;
+  selectedLanguage: SupportedLanguage;
+  setSelectedLanguage: (language: SupportedLanguage) => void;
   onHideSecret: () => void;
   onClear: () => void;
 }
