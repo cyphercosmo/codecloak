@@ -77,21 +77,15 @@ export function hide(
   const lines = sourceCode.split('\n');
   
   if (lines.length === 0) {
-    return `// ${payload}\n`;
+    return `// TODO: Rework this hot mess—see commit ${payload} for context.\n`;
   }
   
   // Determine if we should use a random position (based on randomPlacement parameter)
   // or a fixed position (start of the file)
   const position = randomPlacement ? Math.floor(Math.random() * lines.length) : 0;
   
-  // Determine comment style based on position and source code context
-  // If at the start of the file, prefer a multi-line comment
-  // If elsewhere in the code, randomly choose between styles
-  const useSingleLine = position === 0 ? false : (Math.random() > 0.5);
-  
-  const commentedSecret = useSingleLine 
-    ? `// ${payload}` 
-    : `/* ${payload} */`;
+  // Format the comment to look like a typical TODO comment with the secret embedded as a commit hash
+  const commentedSecret = `// TODO: Rework this hot mess—see commit ${payload} for context.`;
   
   // Insert the comment at the chosen position
   lines.splice(position, 0, commentedSecret);
@@ -113,25 +107,36 @@ export function reveal(
     return '';
   }
   
-  // Regular expression to match both single-line and multi-line comments
-  const commentRegex = /\/\/\s*([A-Za-z0-9+/=]+)(?:\n|$)|\/\*\s*([A-Za-z0-9+/=]+)\s*\*\//g;
+  // Regular expression to match our specific TODO comment format
+  const todoCommentRegex = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess—see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./g;
   
-  // Extract all comments that might contain base64-encoded content
-  // Use a more compatible approach to get all matches
+  // Extract all comments that match our format
   const matches = [];
   let match;
-  while ((match = commentRegex.exec(code)) !== null) {
+  while ((match = todoCommentRegex.exec(code)) !== null) {
     matches.push(match);
   }
   
+  // Fall back to the old method if we don't find our specific pattern
   if (matches.length === 0) {
-    throw new Error('No hidden message found in the code.');
+    // Legacy format support - regular expression to match both single-line and multi-line comments
+    const legacyCommentRegex = /\/\/\s*([A-Za-z0-9+/=]+)(?:\n|$)|\/\*\s*([A-Za-z0-9+/=]+)\s*\*\//g;
+    
+    while ((match = legacyCommentRegex.exec(code)) !== null) {
+      matches.push(match);
+    }
+    
+    if (matches.length === 0) {
+      throw new Error('No hidden message found in the code.');
+    }
   }
   
   // Try each comment to see if it contains our secret
   for (const match of matches) {
     try {
-      const payload = match[1] || match[2]; // group 1 is single-line, group 2 is multi-line
+      // Extract the payload - first check if it's our TODO format (group 1)
+      // or legacy format (groups 1 or 2 from the old regex)
+      const payload = match[1] || match[2];
       
       if (!payload || !/^[A-Za-z0-9+/=]+$/.test(payload)) {
         continue; // Skip if not valid base64
