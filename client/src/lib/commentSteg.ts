@@ -70,47 +70,45 @@ export function hide(
     return sourceCode;
   }
   
+  // Simple direct implementation to ensure it works
   try {
-    // Encrypt the message if requested
-    let payload = '';
+    // Get the payload - either encrypted or plain base64
+    let payload;
+    
     if (encrypt && password) {
-      payload = encryptMessage(secret, password);
-    } else {
-      // Simple base64 encoding without encryption
+      // Use our encrypt function for password protection
       try {
-        payload = Buffer.from(secret).toString('base64');
-        console.log("Base64 encoding successful:", payload);
+        payload = encryptMessage(secret, password);
+        console.log("Encrypted payload created:", payload);
+      } catch (encryptError) {
+        console.error("Encryption failed:", encryptError);
+        // Fallback to simple base64
+        payload = btoa(unescape(encodeURIComponent(secret)));
+        console.log("Fallback to simple base64 after encryption failure");
+      }
+    } else {
+      // No encryption, just use base64
+      try {
+        payload = btoa(unescape(encodeURIComponent(secret)));
+        console.log("Base64 encoding (btoa) successful");
       } catch (e) {
-        console.error("Base64 encoding failed:", e);
-        // Fallback to a simple encoding if Buffer fails
-        payload = btoa(secret);
-        console.log("Fallback btoa encoding used:", payload);
+        console.error("Base64 encoding with btoa failed:", e);
+        // Last resort - use a simple identifier
+        payload = "ENCODING_FAILED_" + Date.now();
+        console.log("Using timestamp as fallback");
       }
     }
     
-    // Split the source code into lines
-    const lines = sourceCode.split('\n');
+    // Create our unique pattern with the secret
+    const commentFormat = `// TODO: Rework this hot mess - see commit ${payload} for context.`;
+    console.log("Generated comment:", commentFormat);
     
-    if (lines.length === 0) {
-      return `// TODO: Rework this hot mess - see commit ${payload} for context.\n`;
-    }
-    
-    // Determine if we should use a random position (based on randomPlacement parameter)
-    // or a fixed position (start of the file)
-    const position = randomPlacement ? Math.floor(Math.random() * lines.length) : 0;
-    
-    // Format the comment to look like a typical TODO comment with the secret embedded as a commit hash
-    // Using regular hyphen instead of em dash for compatibility
-    const commentedSecret = `// TODO: Rework this hot mess - see commit ${payload} for context.`;
-    
-    // Insert the comment at the chosen position
-    lines.splice(position, 0, commentedSecret);
-    
-    return lines.join('\n');
+    // Add to the beginning of the file for consistency
+    return commentFormat + '\n\n' + sourceCode;
   } catch (error) {
     console.error("Error in hide function:", error);
     // Return a basic fallback comment if all else fails
-    return sourceCode + '\n// TODO: Rework this hot mess - see commit FAILED_ENCODING for context.';
+    return `// TODO: Rework this hot mess - see commit FAILED_ENCODING for context.\n\n` + sourceCode;
   }
 }
 
@@ -128,94 +126,88 @@ export function reveal(
     return '';
   }
   
+  // Simplified approach with direct pattern matching
   try {
     console.log("Attempting to reveal secret in code");
     
-    // Regular expression to match our specific TODO comment format
-    const todoCommentRegex = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess\s*-\s*see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./g;
+    // Look for our specific pattern
+    const todoPattern = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess\s*-\s*see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./;
+    const match = code.match(todoPattern);
     
-    // Extract all comments that match our format
-    const matches = [];
-    let match;
-    while ((match = todoCommentRegex.exec(code)) !== null) {
-      matches.push(match);
-    }
-    
-    console.log(`Found ${matches.length} matches with TODO format`);
-    
-    // Fall back to the old method if we don't find our specific pattern
-    if (matches.length === 0) {
-      console.log("No TODO format matches found, trying legacy format");
-      // Legacy format support - regular expression to match both single-line and multi-line comments
-      const legacyCommentRegex = /\/\/\s*([A-Za-z0-9+/=]+)(?:\n|$)|\/\*\s*([A-Za-z0-9+/=]+)\s*\*\//g;
+    if (match && match[1]) {
+      const payload = match[1];
+      console.log("Found TODO pattern match with payload:", payload);
       
-      while ((match = legacyCommentRegex.exec(code)) !== null) {
-        matches.push(match);
+      // Check if this is the error case
+      if (payload.startsWith('FAILED_ENCODING') || payload.startsWith('ENCODING_FAILED')) {
+        throw new Error('This code contains a corrupted secret message.');
       }
       
-      console.log(`Found ${matches.length} matches with legacy format`);
-      
-      if (matches.length === 0) {
-        throw new Error('No hidden message found in the code.');
-      }
-    }
-    
-    // Try each comment to see if it contains our secret
-    for (const match of matches) {
-      try {
-        // Extract the payload - first check if it's our TODO format (group 1)
-        // or legacy format (groups 1 or 2 from the old regex)
-        const payload = match[1] || match[2];
-        
-        console.log("Attempting to decode payload:", payload);
-        
-        if (!payload || !/^[A-Za-z0-9+/=]+$/.test(payload)) {
-          console.log("Payload is not valid base64, skipping");
-          continue; // Skip if not valid base64
-        }
-        
-        let decoded;
+      // Try to decode the payload
+      if (password) {
         try {
-          if (password) {
-            // First try to decrypt using the password in case the message was encrypted
-            console.log("Attempting to decrypt with password");
-            decoded = decryptMessage(payload, password);
-          } else {
-            // If no password, just try base64 decoding
-            console.log("No password, attempting base64 decode");
-            decoded = Buffer.from(payload, 'base64').toString('utf-8');
-          }
-        } catch (error) {
-          console.error("First decoding attempt failed:", error);
-          
-          // If decryption fails, try alternative methods
+          // Try with password first
+          const result = decryptMessage(payload, password);
+          console.log("Successfully decrypted message");
+          return result;
+        } catch (e) {
+          console.error("Decryption failed, trying direct base64", e);
           try {
-            console.log("Trying fallback - direct base64 decode");
-            decoded = Buffer.from(payload, 'base64').toString('utf-8');
-          } catch (decodeError) {
-            console.error("Buffer decode failed, trying browser atob");
-            try {
-              decoded = atob(payload);
-            } catch (atobError) {
-              console.error("All decoding methods failed for this payload");
-              continue;
-            }
+            // Fallback to direct base64 decode
+            return decodeURIComponent(escape(atob(payload)));
+          } catch (e2) {
+            console.error("Fallback decode failed", e2);
+            throw new Error('Could not decrypt the message with the provided password.');
           }
         }
-        
-        // If we got here, we successfully decoded/decrypted something
-        console.log("Successfully decoded message:", decoded);
-        return decoded;
-      } catch (error) {
-        console.error("Error processing match:", error);
-        // If decryption fails, try the next comment
-        continue;
+      } else {
+        // No password - just try base64 decode
+        try {
+          console.log("No password, attempting direct base64 decode");
+          return decodeURIComponent(escape(atob(payload)));
+        } catch (e) {
+          console.error("Base64 decode failed", e);
+          try {
+            // Try another method just in case
+            return Buffer.from(payload, 'base64').toString('utf-8');
+          } catch (e2) {
+            console.error("Buffer decode failed too", e2);
+            throw new Error('Failed to decode the message. The message might be encrypted and require a password.');
+          }
+        }
       }
     }
     
-    throw new Error('No valid hidden message found in the code, or incorrect password.');
+    // If we didn't find our pattern, try the legacy formats as fallback
+    console.log("No TODO format found, trying legacy patterns");
+    
+    // Simple single-line comment with base64
+    const legacyMatch = code.match(/\/\/\s*([A-Za-z0-9+/=]+)/);
+    if (legacyMatch && legacyMatch[1]) {
+      const legacyPayload = legacyMatch[1];
+      console.log("Found legacy pattern match");
+      
+      try {
+        if (password) {
+          return decryptMessage(legacyPayload, password);
+        } else {
+          return Buffer.from(legacyPayload, 'base64').toString('utf-8');
+        }
+      } catch (e) {
+        console.error("Legacy decode failed", e);
+        throw new Error('Could not decode the legacy format message.');
+      }
+    }
+    
+    // If we get here, we couldn't find any valid patterns
+    throw new Error('No hidden message found in the code.');
   } catch (error) {
     console.error("Error in reveal function:", error);
-    throw new Error(`Failed to reveal secret: ${error.message}`);
+    // Safe error handling
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to reveal secret: unknown error');
+    }
   }
 }
