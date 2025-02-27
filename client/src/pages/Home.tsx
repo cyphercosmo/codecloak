@@ -162,18 +162,6 @@ export default function Home() {
           />
         </div>
         
-        <div className="mb-8 bg-white rounded-lg shadow-md p-4 text-[#24292F]">
-          <h3 className="font-semibold mb-2">How to use:</h3>
-          <ol className="list-decimal pl-5 space-y-1">
-            <li>Enter or paste your code in the editor</li>
-            <li>Type your secret message</li>
-            <li>Enter a password if you want encryption (recommended)</li>
-            <li>Click "Hide Secret in Code" button</li>
-            <li>Copy the resulting code to share it</li>
-            <li>To reveal a secret, paste encoded code, enter the password, and click "Reveal Secret"</li>
-          </ol>
-        </div>
-        
         <InfoSection />
       </main>
       <Footer />
