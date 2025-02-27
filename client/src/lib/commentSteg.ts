@@ -77,7 +77,7 @@ export function hide(
   const lines = sourceCode.split('\n');
   
   if (lines.length === 0) {
-    return `// TODO: Rework this hot mess—see commit ${payload} for context.\n`;
+    return `// TODO: Rework this hot mess - see commit ${payload} for context.\n`;
   }
   
   // Determine if we should use a random position (based on randomPlacement parameter)
@@ -85,7 +85,8 @@ export function hide(
   const position = randomPlacement ? Math.floor(Math.random() * lines.length) : 0;
   
   // Format the comment to look like a typical TODO comment with the secret embedded as a commit hash
-  const commentedSecret = `// TODO: Rework this hot mess—see commit ${payload} for context.`;
+  // Using regular hyphen instead of em dash for compatibility
+  const commentedSecret = `// TODO: Rework this hot mess - see commit ${payload} for context.`;
   
   // Insert the comment at the chosen position
   lines.splice(position, 0, commentedSecret);
@@ -108,7 +109,7 @@ export function reveal(
   }
   
   // Regular expression to match our specific TODO comment format
-  const todoCommentRegex = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess—see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./g;
+  const todoCommentRegex = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess\s*-\s*see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./g;
   
   // Extract all comments that match our format
   const matches = [];
