@@ -50,6 +50,8 @@ export default function InputPanel({
   setIsEncryptionEnabled,
   isIntegrityEnabled,
   setIsIntegrityEnabled,
+  selectedLanguage,
+  setSelectedLanguage,
   onHideSecret,
   onClear
 }: InputPanelProps) {
@@ -129,6 +131,31 @@ export default function InputPanel({
                 {isPasswordVisible ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="language-select" className="block text-white mb-1 text-sm">Programming Language</Label>
+            <Select
+              value={selectedLanguage}
+              onValueChange={(value) => setSelectedLanguage(value as SupportedLanguage)}
+            >
+              <SelectTrigger className="w-full bg-[#1E1E1E] border border-[#6E7681] border-opacity-30 text-white">
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1E1E1E] border border-[#6E7681] border-opacity-30 text-white">
+                <SelectItem value="auto"><FaLanguage className="inline mr-2" />Auto-detect</SelectItem>
+                <SelectItem value="javascript">JavaScript</SelectItem>
+                <SelectItem value="typescript">TypeScript</SelectItem>
+                <SelectItem value="python">Python</SelectItem>
+                <SelectItem value="java">Java</SelectItem>
+                <SelectItem value="csharp">C#</SelectItem>
+                <SelectItem value="html">HTML</SelectItem>
+                <SelectItem value="css">CSS</SelectItem>
+                <SelectItem value="php">PHP</SelectItem>
+                <SelectItem value="ruby">Ruby</SelectItem>
+                <SelectItem value="go">Go</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="flex flex-wrap gap-4">

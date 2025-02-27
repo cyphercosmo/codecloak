@@ -7,8 +7,9 @@ import { Link } from "wouter";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaInfoCircle } from "react-icons/fa";
-// Import the StegCloak functions
+// Import the StegCloak functions and types
 import { hideSecret, revealSecret } from "@/lib/stegcloak";
+import { SupportedLanguage } from "@/lib/languageSteg";
 
 export default function Home() {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ export default function Home() {
   const [revealPassword, setRevealPassword] = useState<string>("");
   const [isEncryptionEnabled, setIsEncryptionEnabled] = useState<boolean>(true);
   const [isIntegrityEnabled, setIsIntegrityEnabled] = useState<boolean>(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>("auto");
   const [encodedOutput, setEncodedOutput] = useState<string>("");
   const [encodeSuccess, setEncodeSuccess] = useState<boolean>(false);
   const [revealedSecret, setRevealedSecret] = useState<string>("");
@@ -53,14 +55,27 @@ export default function Home() {
     }
     
     try {
-      // Use the imported hideSecret function
-      const result = await hideSecret(sourceCode, secretMessage, password, isEncryptionEnabled, isIntegrityEnabled);
+      // Use the imported hideSecret function with language support
+      const result = await hideSecret(
+        sourceCode, 
+        secretMessage, 
+        password, 
+        isEncryptionEnabled, 
+        isIntegrityEnabled,
+        selectedLanguage
+      );
+      
       setEncodedOutput(result);
       setEncodeSuccess(true);
       setRevealPassword(password); // Auto-fill the reveal password field for demo convenience
+      
+      const langDisplay = selectedLanguage === 'auto' 
+        ? 'auto-detected language' 
+        : selectedLanguage;
+      
       toast({
         title: "Success",
-        description: "Secret message hidden successfully in code comments",
+        description: `Secret message hidden successfully using ${langDisplay} comment style`,
       });
     } catch (error) {
       toast({
@@ -114,6 +129,7 @@ export default function Home() {
     setSecretMessage("");
     setPassword("");
     setRevealPassword("");
+    setSelectedLanguage("auto");
     setEncodedOutput("");
     setEncodeSuccess(false);
     setRevealedSecret("");
@@ -147,6 +163,8 @@ export default function Home() {
             setIsEncryptionEnabled={setIsEncryptionEnabled}
             isIntegrityEnabled={isIntegrityEnabled}
             setIsIntegrityEnabled={setIsIntegrityEnabled}
+            selectedLanguage={selectedLanguage}
+            setSelectedLanguage={setSelectedLanguage}
             onHideSecret={handleEncode}
             onClear={handleClear}
           />
