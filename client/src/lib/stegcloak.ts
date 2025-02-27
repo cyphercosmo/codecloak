@@ -28,18 +28,26 @@ export async function hideSecret(
     // Detect the programming language from the source code - placeholder for future improvements
     console.log("Detected language: javascript");
     
-    // Use our comment-based implementation
-    // Note: We use the integrity flag to control random placement of the comment
-    const result = commentSteg.hide(
-      sourceCode, 
-      secret, 
-      password, 
-      encrypt, 
-      integrity // Controls random placement of comments
-    );
-    return result;
+    try {
+      // Use our comment-based implementation
+      // Note: We use the integrity flag to control random placement of the comment
+      const result = commentSteg.hide(
+        sourceCode, 
+        secret, 
+        password, 
+        encrypt, 
+        integrity // Controls random placement of comments
+      );
+      console.log("Hide function completed successfully");
+      return result;
+    } catch (innerError) {
+      console.error("Error in commentSteg.hide:", innerError);
+      console.error("Error details:", JSON.stringify(innerError, Object.getOwnPropertyNames(innerError)));
+      throw innerError;
+    }
   } catch (error) {
     console.error("Error hiding secret:", error);
+    console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
     throw new Error("Failed to hide secret in code. Please try again or check your inputs.");
   }
 }

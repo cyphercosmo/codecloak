@@ -70,28 +70,48 @@ export function hide(
     return sourceCode;
   }
   
-  // Encrypt the message if requested
-  const payload = encrypt && password ? encryptMessage(secret, password) : Buffer.from(secret).toString('base64');
-  
-  // Split the source code into lines
-  const lines = sourceCode.split('\n');
-  
-  if (lines.length === 0) {
-    return `// TODO: Rework this hot mess - see commit ${payload} for context.\n`;
+  try {
+    // Encrypt the message if requested
+    let payload = '';
+    if (encrypt && password) {
+      payload = encryptMessage(secret, password);
+    } else {
+      // Simple base64 encoding without encryption
+      try {
+        payload = Buffer.from(secret).toString('base64');
+        console.log("Base64 encoding successful:", payload);
+      } catch (e) {
+        console.error("Base64 encoding failed:", e);
+        // Fallback to a simple encoding if Buffer fails
+        payload = btoa(secret);
+        console.log("Fallback btoa encoding used:", payload);
+      }
+    }
+    
+    // Split the source code into lines
+    const lines = sourceCode.split('\n');
+    
+    if (lines.length === 0) {
+      return `// TODO: Rework this hot mess - see commit ${payload} for context.\n`;
+    }
+    
+    // Determine if we should use a random position (based on randomPlacement parameter)
+    // or a fixed position (start of the file)
+    const position = randomPlacement ? Math.floor(Math.random() * lines.length) : 0;
+    
+    // Format the comment to look like a typical TODO comment with the secret embedded as a commit hash
+    // Using regular hyphen instead of em dash for compatibility
+    const commentedSecret = `// TODO: Rework this hot mess - see commit ${payload} for context.`;
+    
+    // Insert the comment at the chosen position
+    lines.splice(position, 0, commentedSecret);
+    
+    return lines.join('\n');
+  } catch (error) {
+    console.error("Error in hide function:", error);
+    // Return a basic fallback comment if all else fails
+    return sourceCode + '\n// TODO: Rework this hot mess - see commit FAILED_ENCODING for context.';
   }
-  
-  // Determine if we should use a random position (based on randomPlacement parameter)
-  // or a fixed position (start of the file)
-  const position = randomPlacement ? Math.floor(Math.random() * lines.length) : 0;
-  
-  // Format the comment to look like a typical TODO comment with the secret embedded as a commit hash
-  // Using regular hyphen instead of em dash for compatibility
-  const commentedSecret = `// TODO: Rework this hot mess - see commit ${payload} for context.`;
-  
-  // Insert the comment at the chosen position
-  lines.splice(position, 0, commentedSecret);
-  
-  return lines.join('\n');
 }
 
 /**
@@ -108,63 +128,94 @@ export function reveal(
     return '';
   }
   
-  // Regular expression to match our specific TODO comment format
-  const todoCommentRegex = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess\s*-\s*see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./g;
-  
-  // Extract all comments that match our format
-  const matches = [];
-  let match;
-  while ((match = todoCommentRegex.exec(code)) !== null) {
-    matches.push(match);
-  }
-  
-  // Fall back to the old method if we don't find our specific pattern
-  if (matches.length === 0) {
-    // Legacy format support - regular expression to match both single-line and multi-line comments
-    const legacyCommentRegex = /\/\/\s*([A-Za-z0-9+/=]+)(?:\n|$)|\/\*\s*([A-Za-z0-9+/=]+)\s*\*\//g;
+  try {
+    console.log("Attempting to reveal secret in code");
     
-    while ((match = legacyCommentRegex.exec(code)) !== null) {
+    // Regular expression to match our specific TODO comment format
+    const todoCommentRegex = /\/\/\s*TODO:\s*Rework\s*this\s*hot\s*mess\s*-\s*see\s*commit\s*([A-Za-z0-9+/=]+)\s*for\s*context\./g;
+    
+    // Extract all comments that match our format
+    const matches = [];
+    let match;
+    while ((match = todoCommentRegex.exec(code)) !== null) {
       matches.push(match);
     }
     
+    console.log(`Found ${matches.length} matches with TODO format`);
+    
+    // Fall back to the old method if we don't find our specific pattern
     if (matches.length === 0) {
-      throw new Error('No hidden message found in the code.');
-    }
-  }
-  
-  // Try each comment to see if it contains our secret
-  for (const match of matches) {
-    try {
-      // Extract the payload - first check if it's our TODO format (group 1)
-      // or legacy format (groups 1 or 2 from the old regex)
-      const payload = match[1] || match[2];
+      console.log("No TODO format matches found, trying legacy format");
+      // Legacy format support - regular expression to match both single-line and multi-line comments
+      const legacyCommentRegex = /\/\/\s*([A-Za-z0-9+/=]+)(?:\n|$)|\/\*\s*([A-Za-z0-9+/=]+)\s*\*\//g;
       
-      if (!payload || !/^[A-Za-z0-9+/=]+$/.test(payload)) {
-        continue; // Skip if not valid base64
+      while ((match = legacyCommentRegex.exec(code)) !== null) {
+        matches.push(match);
       }
       
-      let decoded;
+      console.log(`Found ${matches.length} matches with legacy format`);
+      
+      if (matches.length === 0) {
+        throw new Error('No hidden message found in the code.');
+      }
+    }
+    
+    // Try each comment to see if it contains our secret
+    for (const match of matches) {
       try {
-        // First try to decrypt using the password in case the message was encrypted
-        decoded = decryptMessage(payload, password);
-      } catch (error) {
-        // If decryption fails, the message may not be encrypted
-        // Try to decode as Base64 directly
-        try {
-          decoded = Buffer.from(payload, 'base64').toString('utf-8');
-        } catch (decodeError) {
-          // If both methods fail, this comment doesn't contain a valid message
-          continue;
+        // Extract the payload - first check if it's our TODO format (group 1)
+        // or legacy format (groups 1 or 2 from the old regex)
+        const payload = match[1] || match[2];
+        
+        console.log("Attempting to decode payload:", payload);
+        
+        if (!payload || !/^[A-Za-z0-9+/=]+$/.test(payload)) {
+          console.log("Payload is not valid base64, skipping");
+          continue; // Skip if not valid base64
         }
+        
+        let decoded;
+        try {
+          if (password) {
+            // First try to decrypt using the password in case the message was encrypted
+            console.log("Attempting to decrypt with password");
+            decoded = decryptMessage(payload, password);
+          } else {
+            // If no password, just try base64 decoding
+            console.log("No password, attempting base64 decode");
+            decoded = Buffer.from(payload, 'base64').toString('utf-8');
+          }
+        } catch (error) {
+          console.error("First decoding attempt failed:", error);
+          
+          // If decryption fails, try alternative methods
+          try {
+            console.log("Trying fallback - direct base64 decode");
+            decoded = Buffer.from(payload, 'base64').toString('utf-8');
+          } catch (decodeError) {
+            console.error("Buffer decode failed, trying browser atob");
+            try {
+              decoded = atob(payload);
+            } catch (atobError) {
+              console.error("All decoding methods failed for this payload");
+              continue;
+            }
+          }
+        }
+        
+        // If we got here, we successfully decoded/decrypted something
+        console.log("Successfully decoded message:", decoded);
+        return decoded;
+      } catch (error) {
+        console.error("Error processing match:", error);
+        // If decryption fails, try the next comment
+        continue;
       }
-      
-      // If we got here, we successfully decoded/decrypted something
-      return decoded;
-    } catch (error) {
-      // If decryption fails, try the next comment
-      continue;
     }
+    
+    throw new Error('No valid hidden message found in the code, or incorrect password.');
+  } catch (error) {
+    console.error("Error in reveal function:", error);
+    throw new Error(`Failed to reveal secret: ${error.message}`);
   }
-  
-  throw new Error('No valid hidden message found in the code, or incorrect password.');
 }
